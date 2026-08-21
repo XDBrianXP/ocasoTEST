@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCASO Coffee Club</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #f7eedd;
+            --dark-card: #1c1a17;
+            --text-light: #ffffff;
+            --accent-amber: #d48b3b;
+            --text-dark: #333333;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding-top: 2rem;
+        }
+        .header-card {
+            background-color: var(--dark-card);
+            color: var(--text-light);
+            width: 90%;
+            max-width: 400px;
+            padding: 1.5rem;
+            border-radius: 16px;
+            margin-bottom: -20px; 
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .header-card h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+        }
+        .header-card p {
+            margin: 0;
+            color: var(--accent-amber);
+            font-size: 0.9rem;
+        }
+        .dot {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-amber);
+            border-radius: 50%;
+        }
+        .main-card {
+            background-color: #ffffff;
+            width: 90%;
+            max-width: 400px;
+            padding: 3rem 2rem 2rem 2rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            box-sizing: border-box;
+        }
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-size: 0.85rem;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+        input[type="text"], input[type="tel"] {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fafafa;
+            color: var(--text-dark);
+            box-sizing: border-box;
+            font-size: 0.9rem;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-amber);
+        }
+
+        /* Estilos del Correo Dividido Morphing */
+        .email-composite {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            width: 100%;
+        }
+        .user-input {
+            flex: 1.2;
+            min-width: 0;
+        }
+        .email-composite span {
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+        .domain-select, .domain-input {
+            flex: 1;
+            min-width: 0;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fafafa;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            box-sizing: border-box;
+        }
+        .btn-reset {
+            display: none;
+            background: none;
+            border: none;
+            color: #d9534f;
+            cursor: pointer;
+            padding: 0 5px;
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+        .btn-reset:hover {
+            color: #c9302c;
+        }
+        
+        /* Estilos del Menú de Preferencias */
+        .custom-select {
+            position: relative;
+            width: 100%;
+        }
+        .select-box {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fafafa;
+            color: var(--text-dark);
+            box-sizing: border-box;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .select-box.active {
+            border-color: var(--accent-amber);
+            outline: none;
+        }
+        .select-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #777;
+        }
+        .select-text.has-value {
+            color: var(--text-dark);
+            font-weight: bold;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #ffffff;
+            width: 100%;
+            box-shadow: 0px 8px 16px rgba(0,0,0,0.1);
+            z-index: 10;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-top: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .dropdown-content label {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            margin: 0;
+            cursor: pointer;
+            font-weight: 400;
+            border-bottom: 1px solid #eee;
+            font-size: 0.9rem;
+        }
+        .dropdown-content label:last-child {
+            border-bottom: none;
+        }
+        .dropdown-content label:hover {
+            background-color: #f9f6f0;
+        }
+        .dropdown-content input[type="checkbox"] {
+            margin-right: 10px;
+            accent-color: var(--accent-amber);
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        .error-msg {
+            color: #d9534f;
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: none;
+            font-weight: bold;
+        }
+
+        button.btn-main {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--dark-card);
+            color: var(--text-light);
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: opacity 0.3s;
+        }
+        button.btn-main:hover {
+            opacity: 0.9;
+        }
+        #qr-section {
+            display: none;
+            text-align: center;
+        }
+        #qrcode {
+            display: flex;
+            justify-content: center;
+            margin: 1.5rem 0;
+        }
+        .qr-text {
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+        .ritual-box {
+            background-color: #f9f6f0;
+            border: 1px solid #e5dcc5;
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: left;
+            margin-bottom: 1rem;
+        }
+        .ritual-box h3 {
+            margin: 0 0 1rem 0;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            border-bottom: 1px solid #e5dcc5;
+            padding-bottom: 0.5rem;
+        }
+        .ritual-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+        .ritual-item strong {
+            color: var(--text-dark);
+            text-align: right;
+            max-width: 60%;
+        }
+        .btn-link {
+            background: none;
+            color: #888;
+            padding: 0;
+            font-size: 0.8rem;
+            text-decoration: underline;
+            margin-top: 0;
+        }
+        .btn-link:hover {
+            color: var(--dark-card);
+        }
+        .loading-text {
+            display: none;
+            text-align: center;
+            color: var(--accent-amber);
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+        #greeting {
+            color: var(--accent-amber);
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-card">
+        <div class="dot"></div>
+        <h1>OCASO</h1>
+        <p>Tu momento. Tu café. Tu pausa.</p>
+    </div>
+
+    <div class="main-card">
+        
+        <form id="registroForm">
+            <div class="form-group">
+                <label for="nombre">Nombre Completo *</label>
+                <input type="text" id="nombre" required 
+                       oninvalid="this.setCustomValidity('Por favor, ingresa tu nombre completo.')" 
+                       oninput="this.setCustomValidity('')">
+            </div>
+            
+            <!-- Correo Principal (Con Morphing) -->
+            <div class="form-group">
+                <label>Correo Electrónico *</label>
+                <div class="email-composite">
+                    <input type="text" id="correoUser" class="user-input" placeholder="usuario" required oninput="limpiarErrorCorreo()">
+                    <span>@</span>
+                    <!-- Dropdown original -->
+                    <select id="correoDominio" class="domain-select" required onchange="verificarDominio('correoDominio', 'correoCustom', 'btnResetDominio')">
+                        <option value="gmail.com" selected>gmail.com</option>
+                        <option value="hotmail.com">hotmail.com</option>
+                        <option value="yahoo.com">yahoo.com</option>
+                        <option value="outlook.com">outlook.com</option>
+                        <option value="icloud.com">icloud.com</option>
+                        <option value="live.com.mx">live.com.mx</option>
+                        <option value="yahoo.com.mx">yahoo.com.mx</option>
+                        <option value="hotmail.es">hotmail.es</option>
+                        <option value="msn.com">msn.com</option>
+                        <option value="prodigy.net.mx">prodigy.net.mx</option>
+                        <option value="otro">Otro...</option>
+                    </select>
+                    <!-- Campo de texto oculto que reemplaza al dropdown -->
+                    <input type="text" id="correoCustom" class="domain-input" style="display:none;" placeholder="ejemplo.com" oninput="limpiarErrorCorreo()">
+                    <!-- Botón para regresar al dropdown -->
+                    <button type="button" id="btnResetDominio" class="btn-reset" onclick="resetDominio('correoDominio', 'correoCustom', 'btnResetDominio')" title="Volver a la lista">✖</button>
+                </div>
+            </div>
+
+            <!-- Confirmar Correo (Con Morphing) -->
+            <div class="form-group">
+                <label>Confirmar Correo *</label>
+                <div class="email-composite">
+                    <input type="text" id="correoConfUser" class="user-input" placeholder="usuario" required oninput="limpiarErrorCorreo()">
+                    <span>@</span>
+                    <!-- Dropdown original -->
+                    <select id="correoConfDominio" class="domain-select" required onchange="verificarDominio('correoConfDominio', 'correoConfCustom', 'btnResetConfDominio')">
+                        <option value="gmail.com" selected>gmail.com</option>
+                        <option value="hotmail.com">hotmail.com</option>
+                        <option value="yahoo.com">yahoo.com</option>
+                        <option value="outlook.com">outlook.com</option>
+                        <option value="icloud.com">icloud.com</option>
+                        <option value="live.com.mx">live.com.mx</option>
+                        <option value="yahoo.com.mx">yahoo.com.mx</option>
+                        <option value="hotmail.es">hotmail.es</option>
+                        <option value="msn.com">msn.com</option>
+                        <option value="prodigy.net.mx">prodigy.net.mx</option>
+                        <option value="otro">Otro...</option>
+                    </select>
+                    <!-- Campo de texto oculto que reemplaza al dropdown -->
+                    <input type="text" id="correoConfCustom" class="domain-input" style="display:none;" placeholder="ejemplo.com" oninput="limpiarErrorCorreo()">
+                    <!-- Botón para regresar al dropdown -->
+                    <button type="button" id="btnResetConfDominio" class="btn-reset" onclick="resetDominio('correoConfDominio', 'correoConfCustom', 'btnResetConfDominio')" title="Volver a la lista">✖</button>
+                </div>
+                <p id="error-correo" class="error-msg">⚠ Los correos no coinciden. Por favor, verifica.</p>
+            </div>
+
+            <div class="form-group">
+                <label>Alergias o Preferencias *</label>
+                <div class="custom-select" id="customSelect">
+                    <div class="select-box" onclick="toggleDropdown('dropdownOptions', 'select-box')">
+                        <span class="select-text" id="selectText">Selecciona tus preferencias</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="dropdown-content" id="dropdownOptions">
+                        <label><input type="checkbox" value="Ninguna" onchange="handleSelection(this, 'dropdownOptions', 'selectText', 'alergiasHidden', 'error-alergias')"> Ninguna</label>
+                        <label><input type="checkbox" value="Intolerancia a la lactosa" onchange="handleSelection(this, 'dropdownOptions', 'selectText', 'alergiasHidden', 'error-alergias')"> Intolerancia a la lactosa</label>
+                        <label><input type="checkbox" value="Alergia a la nuez / frutos secos" onchange="handleSelection(this, 'dropdownOptions', 'selectText', 'alergiasHidden', 'error-alergias')"> Alergia a la nuez / frutos secos</label>
+                        <label><input type="checkbox" value="Vegano" onchange="handleSelection(this, 'dropdownOptions', 'selectText', 'alergiasHidden', 'error-alergias')"> Vegano</label>
+                        <label><input type="checkbox" value="Otra" onchange="handleSelection(this, 'dropdownOptions', 'selectText', 'alergiasHidden', 'error-alergias')"> Otra (Le comentaré al barista)</label>
+                    </div>
+                </div>
+                <input type="hidden" id="alergiasHidden" required>
+                <p id="error-alergias" class="error-msg">Por favor, selecciona al menos una opción.</p>
+            </div>
+
+            <div class="form-group">
+                <label for="telefono">Teléfono (Opcional)</label>
+                <input type="tel" id="telefono">
+            </div>
+
+            <button type="submit" id="btnSubmit" class="btn-main">Obtener mi Código</button>
+            <div id="loading" class="loading-text">Generando pase...</div>
+        </form>
+
+        <div id="qr-section">
+            <div id="greeting"></div>
+            <div id="qrcode"></div>
+            <p class="qr-text">Muéstralo en la barra para ordenar</p>
+            
+            <div class="ritual-box">
+                <h3>Tu Ritual de Consumo</h3>
+                <div class="ritual-item">
+                    <span>Visitas totales:</span>
+                    <strong>0</strong>
+                </div>
+                <div class="ritual-item">
+                    <span>Bebida favorita:</span>
+                    <strong>Ninguna</strong>
+                </div>
+                <div class="ritual-item">
+                    <span>Alimento favorito:</span>
+                    <strong>Ninguno</strong>
+                </div>
+                <div class="ritual-item" style="margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 5px;">
+                    <span>Nota para el barista:</span>
+                    <strong id="displayAlergia"></strong>
+                </div>
+                
+                <div style="text-align: right;">
+                    <button type="button" onclick="mostrarEditor()" style="background:none; border:none; color:var(--accent-amber); padding:0; text-decoration:underline; font-size:0.8rem; width:auto; margin-top: 5px;">Editar notas</button>
+                </div>
+
+                <div id="edit-preferences-section" style="display:none; margin-top: 15px; border-top: 1px solid #e5dcc5; padding-top: 15px;">
+                    <label style="font-size:0.85rem; color:var(--text-dark); margin-bottom: 5px; display:block;">Nuevas Preferencias *</label>
+                    <div class="custom-select" id="customSelectUpdate">
+                        <div class="select-box update-box" onclick="toggleDropdown('dropdownOptionsUpdate', 'update-box')">
+                            <span class="select-text" id="selectTextUpdate">Selecciona tus preferencias</span>
+                            <span class="arrow">▼</span>
+                        </div>
+                        <div class="dropdown-content" id="dropdownOptionsUpdate">
+                            <label><input type="checkbox" value="Ninguna" onchange="handleSelection(this, 'dropdownOptionsUpdate', 'selectTextUpdate', 'alergiasHiddenUpdate', 'error-alergias-update')"> Ninguna</label>
+                            <label><input type="checkbox" value="Intolerancia a la lactosa" onchange="handleSelection(this, 'dropdownOptionsUpdate', 'selectTextUpdate', 'alergiasHiddenUpdate', 'error-alergias-update')"> Intolerancia a la lactosa</label>
+                            <label><input type="checkbox" value="Alergia a la nuez / frutos secos" onchange="handleSelection(this, 'dropdownOptionsUpdate', 'selectTextUpdate', 'alergiasHiddenUpdate', 'error-alergias-update')"> Alergia a la nuez / frutos secos</label>
+                            <label><input type="checkbox" value="Vegano" onchange="handleSelection(this, 'dropdownOptionsUpdate', 'selectTextUpdate', 'alergiasHiddenUpdate', 'error-alergias-update')"> Vegano</label>
+                            <label><input type="checkbox" value="Otra" onchange="handleSelection(this, 'dropdownOptionsUpdate', 'selectTextUpdate', 'alergiasHiddenUpdate', 'error-alergias-update')"> Otra (Le comentaré al barista)</label>
+                        </div>
+                    </div>
+                    <input type="hidden" id="alergiasHiddenUpdate">
+                    <p id="error-alergias-update" class="error-msg">Selecciona al menos una opción.</p>
+                    <button type="button" id="btnUpdate" class="btn-main" onclick="enviarActualizacion()" style="padding: 0.8rem; font-size: 0.9rem;">Guardar Cambios</button>
+                    <div id="loadingUpdate" class="loading-text" style="font-size: 0.9rem;">Actualizando...</div>
+                </div>
+            </div>
+
+            <button type="button" class="btn-link" onclick="location.reload()">¿No eres tú? Cambiar de cuenta</button>
+        </div>
+
+    </div>
+
+    <script>
+        let currentEmail = ""; 
+
+        // --- LÓGICA DE MORPHING PARA EL CORREO ---
+        function verificarDominio(selectId, inputId, resetBtnId) {
+            const select = document.getElementById(selectId);
+            const input = document.getElementById(inputId);
+            const resetBtn = document.getElementById(resetBtnId);
+            
+            if (select.value === 'otro') {
+                select.style.display = 'none';
+                input.style.display = 'block';
+                input.required = true;
+                resetBtn.style.display = 'block';
+                input.focus();
+            }
+            limpiarErrorCorreo();
+        }
+
+        function resetDominio(selectId, inputId, resetBtnId) {
+            const select = document.getElementById(selectId);
+            const input = document.getElementById(inputId);
+            const resetBtn = document.getElementById(resetBtnId);
+            
+            select.style.display = 'block';
+            select.value = 'gmail.com'; // Vuelve al default
+            input.style.display = 'none';
+            input.value = '';
+            input.required = false;
+            resetBtn.style.display = 'none';
+            limpiarErrorCorreo();
+        }
+
+        function armarCorreo(userId, selectId, customId) {
+            const user = document.getElementById(userId).value.trim();
+            let domain = document.getElementById(selectId).value;
+            if (domain === 'otro') {
+                domain = document.getElementById(customId).value.trim();
+            }
+            return user.toLowerCase() + '@' + domain.toLowerCase();
+        }
+
+        function limpiarErrorCorreo() {
+            document.getElementById('error-correo').style.display = 'none';
+        }
+
+        // --- LÓGICA DEL MENÚ DE PREFERENCIAS ---
+        function toggleDropdown(dropdownId, boxClass) {
+            const dropdown = document.getElementById(dropdownId);
+            const box = document.querySelector('.' + boxClass) || document.querySelector('.select-box');
+            
+            if (dropdown.style.display === 'block') {
+                dropdown.style.display = 'none';
+                box.classList.remove('active');
+            } else {
+                dropdown.style.display = 'block';
+                box.classList.add('active');
+            }
+        }
+
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.custom-select')) {
+                document.querySelectorAll('.dropdown-content').forEach(d => d.style.display = 'none');
+                document.querySelectorAll('.select-box').forEach(b => b.classList.remove('active'));
+            }
+        });
+
+        function handleSelection(clickedCheckbox, dropdownId, textId, hiddenId, errorId) {
+            const checkboxes = document.querySelectorAll(`#${dropdownId} input[type="checkbox"]`);
+            const selectText = document.getElementById(textId);
+            const hiddenInput = document.getElementById(hiddenId);
+            const errorMsg = document.getElementById(errorId);
+
+            if (clickedCheckbox.value === 'Ninguna') {
+                if (clickedCheckbox.checked) {
+                    checkboxes.forEach(cb => { if (cb.value !== 'Ninguna') cb.checked = false; });
+                }
+            } else {
+                if (clickedCheckbox.checked) {
+                    document.querySelector(`#${dropdownId} input[value="Ninguna"]`).checked = false;
+                }
+            }
+
+            const seleccionadas = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+
+            if (seleccionadas.length > 0) {
+                if (seleccionadas.includes('Ninguna')) {
+                    selectText.innerText = '0 seleccionadas (Ninguna)';
+                } else {
+                    selectText.innerText = seleccionadas.length === 1 
+                        ? '1 seleccionada' 
+                        : `${seleccionadas.length} seleccionadas`;
+                }
+                
+                selectText.classList.add('has-value');
+                hiddenInput.value = seleccionadas.join(', ');
+                errorMsg.style.display = 'none';
+            } else {
+                selectText.innerText = 'Selecciona tus preferencias';
+                selectText.classList.remove('has-value');
+                hiddenInput.value = '';
+            }
+        }
+
+        function mostrarEditor() {
+            const editSection = document.getElementById('edit-preferences-section');
+            editSection.style.display = editSection.style.display === 'none' ? 'block' : 'none';
+        }
+
+        const form = document.getElementById('registroForm');
+        const btnSubmit = document.getElementById('btnSubmit');
+        const loading = document.getElementById('loading');
+        const qrSection = document.getElementById('qr-section');
+        const qrcodeDiv = document.getElementById('qrcode');
+        const greetingText = document.getElementById('greeting');
+        const displayAlergia = document.getElementById('displayAlergia');
+
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxLgQItcfeq9SW1j70jPBy_LCdEmmsAptXRmVoH8rmCVJiEf8LCGZ2--SyknXr9ayFAvA/exec';
+
+        // --- CONEXIÓN AL BACKEND ---
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const correo1 = armarCorreo('correoUser', 'correoDominio', 'correoCustom');
+            const correo2 = armarCorreo('correoConfUser', 'correoConfDominio', 'correoConfCustom');
+            
+            if (correo1 !== correo2) {
+                document.getElementById('error-correo').style.display = 'block';
+                return; 
+            }
+
+            const hiddenInput = document.getElementById('alergiasHidden').value;
+            if (hiddenInput === '') {
+                document.getElementById('error-alergias').style.display = 'block';
+                return;
+            }
+            
+            btnSubmit.style.display = 'none';
+            loading.style.display = 'block';
+
+            currentEmail = correo1;
+
+            const data = {
+                action: 'register',
+                nombre: document.getElementById('nombre').value,
+                correo: currentEmail,
+                telefono: document.getElementById('telefono').value,
+                alergias: hiddenInput
+            };
+
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(data),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    form.style.display = 'none';
+                    qrSection.style.display = 'block';
+                    greetingText.innerText = '¡Hola, ' + result.nombre.split(' ')[0] + '!';
+                    displayAlergia.innerText = data.alergias;
+                    
+                    new QRCode(qrcodeDiv, {
+                        text: result.qrCode,
+                        width: 180,
+                        height: 180,
+                        colorDark : "#000000",
+                        colorLight : "#ffffff",
+                        correctLevel : QRCode.CorrectLevel.H
+                    });
+                } else {
+                    alert("Aviso: " + result.message);
+                    btnSubmit.style.display = 'block';
+                }
+            } catch (error) {
+                alert("Error de conexión. Intenta de nuevo.");
+                btnSubmit.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+
+        async function enviarActualizacion() {
+            const nuevasAlergias = document.getElementById('alergiasHiddenUpdate').value;
+            if (nuevasAlergias === '') {
+                document.getElementById('error-alergias-update').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('btnUpdate').style.display = 'none';
+            document.getElementById('loadingUpdate').style.display = 'block';
+
+            const updateData = {
+                action: 'update',
+                correo: currentEmail,
+                alergias: nuevasAlergias
+            };
+
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(updateData),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    displayAlergia.innerText = result.alergias;
+                    document.getElementById('edit-preferences-section').style.display = 'none';
+                    alert("¡Tus preferencias han sido actualizadas con éxito!");
+                } else {
+                    alert("Hubo un error: " + result.message);
+                }
+            } catch (error) {
+                alert("Error de conexión. Intenta de nuevo.");
+            } finally {
+                document.getElementById('btnUpdate').style.display = 'block';
+                document.getElementById('loadingUpdate').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

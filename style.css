@@ -1,0 +1,200 @@
+/* Paleta de Colores Oficial OCASO */
+:root {
+    --ambar-ocaso: #F2A35E;
+    --ambar-interfaz: #D9873F;
+    --carbon-profundo: #1B1B19;
+    --marfil-digital: #F7F1E8;
+    --nogal-tostado: #68452F;
+    --terracota: #B96438;
+    --verde-botanico: #485442;
+    --azul-horizonte: #4A6884;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+
+body {
+    background-color: var(--marfil-digital);
+    color: var(--carbon-profundo);
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.app-container {
+    width: 100%;
+    max-width: 480px;
+    padding: 20px;
+}
+
+.header-ocaso {
+    background-color: var(--carbon-profundo);
+    color: var(--marfil-digital);
+    padding: 30px 20px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.header-ocaso::after {
+    content: '';
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    width: 12px;
+    height: 12px;
+    background-color: var(--ambar-ocaso);
+    border-radius: 50%;
+}
+
+.header-ocaso h1 {
+    font-size: 24px;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+}
+
+.header-ocaso p {
+    font-size: 14px;
+    color: var(--ambar-ocaso);
+}
+
+.card-registro {
+    background-color: white;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.card-registro h2 {
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: var(--nogal-tostado);
+    margin-bottom: 20px;
+}
+
+.tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #eee;
+}
+
+.tab {
+    flex: 1;
+    padding: 12px;
+    background: none;
+    border: none;
+    font-weight: bold;
+    color: #b3b3b3;
+    cursor: pointer;
+    border-radius: 0;
+    margin-top: 0;
+    font-size: 14px;
+}
+
+.tab.active {
+    color: var(--ambar-interfaz);
+    border-bottom: 3px solid var(--ambar-interfaz);
+}
+
+.tab:focus {
+    outline: none;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: var(--marfil-digital);
+    color: var(--carbon-profundo);
+    font-size: 16px;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: var(--ambar-interfaz);
+}
+
+button[type="submit"] {
+    width: 100%;
+    padding: 15px;
+    background-color: var(--ambar-interfaz);
+    color: var(--carbon-profundo);
+    font-weight: bold;
+    font-size: 16px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: 0.3s;
+}
+
+button[type="submit"]:active {
+    background-color: var(--ambar-ocaso);
+}
+
+button[type="submit"]:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.oculto {
+    display: none !important;
+}
+
+#mensajeSistema {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* NUEVO: Estilos para la tarjeta de estadísticas */
+.stats-card {
+    background-color: var(--marfil-digital);
+    padding: 15px;
+    border-radius: 12px;
+    margin-top: 20px;
+    text-align: left;
+    border: 1px solid #e0d8c8;
+}
+
+.stats-card h4 {
+    color: var(--nogal-tostado);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e0d8c8;
+    font-size: 15px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: var(--carbon-profundo);
+}
+
+.stat-item:last-child {
+    margin-bottom: 0;
+}
