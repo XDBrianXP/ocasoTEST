@@ -1,4 +1,6 @@
-/* Paleta de Colores Oficial OCASO */
+/* ==========================================
+   PALETA DE COLORES OFICIAL OCASO
+   ========================================== */
 :root {
     --ambar-ocaso: #F2A35E;
     --ambar-interfaz: #D9873F;
@@ -22,103 +24,54 @@ body {
     color: var(--carbon-profundo);
     display: flex;
     justify-content: center;
+    align-items: center;
     min-height: 100vh;
 }
 
-.app-container {
-    width: 100%;
-    max-width: 480px;
-    padding: 20px;
-}
-
-.header-ocaso {
-    background-color: var(--carbon-profundo);
-    color: var(--marfil-digital);
-    padding: 30px 20px;
-    border-radius: 20px;
-    margin-bottom: 20px;
-    position: relative;
-}
-
-.header-ocaso::after {
-    content: '';
-    position: absolute;
-    top: 25px;
-    right: 25px;
-    width: 12px;
-    height: 12px;
-    background-color: var(--ambar-ocaso);
-    border-radius: 50%;
-}
-
-.header-ocaso h1 {
-    font-size: 24px;
-    letter-spacing: 2px;
-    margin-bottom: 8px;
-}
-
-.header-ocaso p {
-    font-size: 14px;
-    color: var(--ambar-ocaso);
-}
-
-.card-registro {
+.card {
     background-color: white;
     padding: 25px;
     border-radius: 20px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    width: 100%;
+    max-width: 480px;
+    margin: 20px;
 }
 
-.card-registro h2 {
+.card-header {
+    background-color: var(--carbon-profundo);
+    color: var(--marfil-digital);
+    padding: 25px 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.card-header h2 {
+    font-size: 24px;
+    letter-spacing: 2px;
     margin-bottom: 5px;
 }
 
-.subtitle {
+.card-header p {
     font-size: 14px;
-    color: var(--nogal-tostado);
-    margin-bottom: 20px;
+    color: var(--ambar-ocaso);
 }
 
-.tabs {
-    display: flex;
-    margin-bottom: 20px;
-    border-bottom: 2px solid #eee;
-}
-
-.tab {
-    flex: 1;
-    padding: 12px;
-    background: none;
-    border: none;
-    font-weight: bold;
-    color: #b3b3b3;
-    cursor: pointer;
-    border-radius: 0;
-    margin-top: 0;
-    font-size: 14px;
-}
-
-.tab.active {
-    color: var(--ambar-interfaz);
-    border-bottom: 3px solid var(--ambar-interfaz);
-}
-
-.tab:focus {
-    outline: none;
-}
-
-.input-group {
+.form-group {
     margin-bottom: 15px;
 }
 
-.input-group label {
+.form-group label {
     display: block;
     font-size: 14px;
     font-weight: bold;
     margin-bottom: 5px;
+    color: var(--carbon-profundo);
 }
 
-.input-group input {
+.form-group input, 
+.form-group select {
     width: 100%;
     padding: 12px;
     border: 1px solid #ddd;
@@ -128,12 +81,32 @@ body {
     font-size: 16px;
 }
 
-.input-group input:focus {
+.form-group input:focus, 
+.form-group select:focus {
     outline: none;
     border-color: var(--ambar-interfaz);
 }
 
-button[type="submit"] {
+.email-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.email-row input {
+    flex: 2;
+}
+
+.email-row span {
+    font-weight: bold;
+    color: #666;
+}
+
+.email-row select {
+    flex: 1.5;
+}
+
+.submit-btn {
     width: 100%;
     padding: 15px;
     background-color: var(--ambar-interfaz);
@@ -147,59 +120,147 @@ button[type="submit"] {
     transition: 0.3s;
 }
 
-button[type="submit"]:active {
+.submit-btn:hover {
     background-color: var(--ambar-ocaso);
 }
 
-button[type="submit"]:disabled {
-    opacity: 0.7;
+.submit-btn:disabled {
+    background: #888;
     cursor: not-allowed;
+    opacity: 0.7;
 }
 
-.oculto {
-    display: none !important;
-}
-
-#mensajeSistema {
+.footer-link {
+    text-align: center;
     margin-top: 15px;
+}
+
+.footer-link a {
+    color: var(--nogal-tostado);
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.footer-link a:hover {
+    text-decoration: underline;
+}
+
+/* ==========================================
+   DASHBOARD Y TABS
+   ========================================== */
+.user-greeting {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.user-greeting h3 {
+    color: var(--carbon-profundo);
+    font-size: 20px;
+}
+
+.user-greeting p {
+    color: var(--nogal-tostado);
+    font-size: 14px;
+}
+
+.nav-tabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #ddd;
+}
+
+.tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
     padding: 10px;
-    border-radius: 8px;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.tab-btn.active {
+    color: var(--ambar-interfaz);
+    border-bottom: 3px solid var(--ambar-interfaz);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.qr-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.qr-instructions {
     text-align: center;
     font-size: 14px;
-    font-weight: bold;
+    color: #666;
 }
 
-/* NUEVO: Estilos para la tarjeta de estadísticas */
-.stats-card {
-    background-color: var(--marfil-digital);
+/* ==========================================
+   TICKETS VIRTUALES
+   ========================================== */
+.ticket-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
     padding: 15px;
-    border-radius: 12px;
-    margin-top: 20px;
-    text-align: left;
-    border: 1px solid #e0d8c8;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
 }
 
-.stats-card h4 {
-    color: var(--nogal-tostado);
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #e0d8c8;
-    font-size: 15px;
-}
-
-.stat-item {
+.ticket-header {
     display: flex;
     justify-content: space-between;
+    font-size: 12px;
+    color: #666;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 6px;
     margin-bottom: 8px;
+}
+
+.ticket-body p {
     font-size: 14px;
-    color: var(--carbon-profundo);
+    margin: 4px 0;
 }
 
-.stat-item:last-child {
-    margin-bottom: 0;
+.ticket-notes {
+    color: var(--ambar-interfaz);
+    font-size: 12px;
+    font-style: italic;
 }
 
-/* Modal Aviso de Privacidad */
+.ticket-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    border-top: 1px solid #eee;
+    padding-top: 8px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.badge-success {
+    background: #d4edda;
+    color: #155724;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+}
+
+/* ==========================================
+   MODAL AVISO DE PRIVACIDAD
+   ========================================== */
 .modal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -207,6 +268,7 @@ button[type="submit"]:disabled {
     display: flex; justify-content: center; align-items: center;
     z-index: 1000;
 }
+
 .modal-content {
     background: #f7fced;
     padding: 24px;
@@ -215,12 +277,14 @@ button[type="submit"]:disabled {
     width: 90%;
     box-shadow: 0 4px 20px rgba(0,0,0,0.2);
 }
+
 .privacy-text {
     font-size: 14px;
     color: #333333;
     line-height: 1.5;
     margin: 15px 0;
 }
+
 .privacy-check {
     display: flex;
     align-items: center;
@@ -228,10 +292,12 @@ button[type="submit"]:disabled {
     margin-bottom: 20px;
     font-size: 13px;
 }
+
 .modal-actions {
     display: flex;
     gap: 10px;
 }
+
 .btn-secondary {
     flex: 1;
     background: #ccc;
@@ -241,75 +307,4 @@ button[type="submit"]:disabled {
     border-radius: 8px;
     font-weight: bold;
     cursor: pointer;
-}
-.submit-btn:disabled {
-    background: #888;
-    cursor: not-allowed;
-}
-
-/* Tabs Dashboard & Tickets */
-.nav-tabs {
-    display: flex;
-    gap: 5px;
-    margin-bottom: 20px;
-    border-bottom: 2px solid #ddd;
-}
-.tab-btn {
-    flex: 1;
-    background: none;
-    border: none;
-    padding: 10px;
-    font-weight: bold;
-    color: #666;
-    cursor: pointer;
-}
-.tab-btn.active {
-    color: #d48b3b;
-    border-bottom: 3px solid #d48b3b;
-}
-.tab-content {
-    display: none;
-}
-.tab-content.active {
-    display: block;
-}
-.ticket-card {
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 15px;
-}
-.ticket-header {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    color: #666;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 5px;
-    margin-bottom: 8px;
-}
-.ticket-body p {
-    font-size: 14px;
-    margin: 4px 0;
-}
-.ticket-notes {
-    color: #d48b3b;
-    font-size: 12px;
-}
-.ticket-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 10px;
-    border-top: 1px solid #eee;
-    padding-top: 8px;
-    font-weight: bold;
-}
-.badge-success {
-    background: #d4edda;
-    color: #155724;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-size: 11px;
 }
