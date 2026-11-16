@@ -1,5 +1,5 @@
 // URL OFICIAL Y EXACTA DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLgQItcfeq9SW1j70jPBy_LCdEmmsAptXRMVoH8rmCVJiEf8LCGZ2--SyknXr9ayFAvA/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLgQItcfeq9SW1j70jPBy_LCdEmmsAptXRmVoH8rmCVJiEf8LCGZ2--SyknXr9ayFAvA/exec";
 
 document.addEventListener('DOMContentLoaded', () => {
     const btnOpenModal = document.getElementById('btnOpenModal');
@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ejecutarRegistroCliente();
     });
 
-    // INICIAR SESIÓN CONTRA GOOGLE SHEETS
+    // INICIAR SESIÓN CONTRA GOOGLE SHEETS (CON HEADERS)
     btnLoginSubmit.addEventListener('click', async () => {
         const emailInput = document.getElementById('loginEmail').value.trim().toLowerCase();
         if (!emailInput) {
@@ -87,6 +87,9 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(APPS_SCRIPT_URL, {
                 method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8'
+                },
                 body: JSON.stringify({ action: "login", correo: emailInput })
             });
             const result = await response.json();
@@ -111,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // GUARDAR CAMBIOS DE PREFERENCIAS EN GOOGLE SHEETS (CON MANEJO DE REDIRECCIÓN)
+    // GUARDAR CAMBIOS DE PREFERENCIAS EN GOOGLE SHEETS (CON HEADERS)
     btnUpdatePrefs.addEventListener('click', async () => {
         const nuevaAlergia = document.getElementById('editAlergias').value;
         let currentUser = JSON.parse(localStorage.getItem('ocaso_user') || '{}');
@@ -127,6 +130,9 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(APPS_SCRIPT_URL, {
                 method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8'
+                },
                 body: JSON.stringify({ 
                     action: "update", 
                     correo: currentUser.email, 
@@ -177,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// REGISTRO NUEVO DIRECTO A GOOGLE SHEETS (CON MANEJO DE REDIRECCIÓN)
+// REGISTRO NUEVO DIRECTO A GOOGLE SHEETS (CON HEADERS Y FECHA LOCAL)
 async function ejecutarRegistroCliente() {
     const nombre = document.getElementById('nombre').value.trim();
     const email = `${document.getElementById('emailUser').value.trim()}@${document.getElementById('emailDomain').value}`;
@@ -201,6 +207,9 @@ async function ejecutarRegistroCliente() {
     try {
         const response = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8'
+            },
             body: JSON.stringify(clienteData)
         });
         
