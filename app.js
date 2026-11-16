@@ -1,5 +1,5 @@
-// TU URL DE GOOGLE APPS SCRIPT
-const APPS_SCRIPT_URL = "TU_URL_DE_APPS_SCRIPT_AQUI";
+// URL OFICIAL DE TU WEB APP EN GOOGLE APPS SCRIPT (EL PUENTE)
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLgQItcfeq9SW1j70jPBy_LCdEmmsAptXRMVoH8rmCVJiEf8LCGZ2--SyknXr9a.../exec";
 
 document.addEventListener('DOMContentLoaded', () => {
     const btnOpenModal = document.getElementById('btnOpenModal');
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnLogout = document.getElementById('btnLogout');
     const btnUpdatePrefs = document.getElementById('btnUpdatePrefs');
 
-    // Sesión activa previa
+    // Verificar sesión activa previa
     const savedUser = localStorage.getItem('ocaso_user');
     if (savedUser) {
         mostrarDashboard(JSON.parse(savedUser));
@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ejecutarRegistroCliente();
     });
 
-    // INICIAR SESIÓN ESTRICTO (Validando contra Google Sheets)
+    // INICIAR SESIÓN CONTRA GOOGLE SHEETS
     btnLoginSubmit.addEventListener('click', async () => {
         const emailInput = document.getElementById('loginEmail').value.trim().toLowerCase();
         if (!emailInput) {
@@ -100,8 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem('ocaso_user', JSON.stringify(clienteData));
                 mostrarDashboard(clienteData);
             } else {
-                // Bloqueo estricto: Si no existe, muestra el mensaje de error y no entra
-                alert(result.message || 'No encontramos una cuenta registrada con este correo.');
+                alert(result.message || 'Cuenta no encontrada.');
             }
         } catch (error) {
             console.error(error);
@@ -112,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // GUARDAR CAMBIOS DE PREFERENCIAS
+    // GUARDAR CAMBIOS DE PREFERENCIAS EN GOOGLE SHEETS
     btnUpdatePrefs.addEventListener('click', async () => {
         const nuevaAlergia = document.getElementById('editAlergias').value;
         let currentUser = JSON.parse(localStorage.getItem('ocaso_user') || '{}');
@@ -173,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// REGISTRO NUEVO
+// REGISTRO NUEVO DIRECTO A GOOGLE SHEETS
 async function ejecutarRegistroCliente() {
     const nombre = document.getElementById('nombre').value.trim();
     const email = `${document.getElementById('emailUser').value.trim()}@${document.getElementById('emailDomain').value}`;
