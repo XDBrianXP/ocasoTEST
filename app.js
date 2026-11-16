@@ -1,3 +1,6 @@
+// TU URL DE GOOGLE APPS SCRIPT
+const APPS_SCRIPT_URL = "TU_URL_DE_APPS_SCRIPT_AQUI";
+
 document.addEventListener('DOMContentLoaded', () => {
     const btnOpenModal = document.getElementById('btnOpenModal');
     const privacyModal = document.getElementById('privacyModal');
@@ -14,27 +17,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnLogout = document.getElementById('btnLogout');
     const btnUpdatePrefs = document.getElementById('btnUpdatePrefs');
 
-    // Verificar si ya hay una sesión activa
+    // Sesión activa previa
     const savedUser = localStorage.getItem('ocaso_user');
     if (savedUser) {
         mostrarDashboard(JSON.parse(savedUser));
     }
 
-    // Cambiar a pantalla de Login
     showLogin.addEventListener('click', (e) => {
         e.preventDefault();
         registrationForm.style.display = 'none';
         loginView.style.display = 'block';
     });
 
-    // Regresar al Registro desde Login
     showRegister.addEventListener('click', (e) => {
         e.preventDefault();
         loginView.style.display = 'none';
         registrationForm.style.display = 'block';
     });
 
-    // Validar formulario de registro y abrir modal de privacidad
     btnOpenModal.addEventListener('click', () => {
         const nombre = document.getElementById('nombre').value.trim();
         const emailUser = document.getElementById('emailUser').value.trim();
@@ -68,49 +68,90 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Debes aceptar el aviso de privacidad para completar tu registro en Ocaso Club.');
     });
 
-    // Al aceptar privacidad, guardamos y registramos
     btnAcceptPrivacy.addEventListener('click', () => {
         privacyModal.style.display = 'none';
         ejecutarRegistroCliente();
     });
 
-    // Iniciar sesión con correo existente
-    btnLoginSubmit.addEventListener('click', () => {
+    // INICIAR SESIÓN ESTRICTO (Validando contra Google Sheets)
+    btnLoginSubmit.addEventListener('click', async () => {
         const emailInput = document.getElementById('loginEmail').value.trim().toLowerCase();
         if (!emailInput) {
             alert('Por favor ingresa tu correo electrónico.');
             return;
         }
 
-        const localData = localStorage.getItem('ocaso_user');
-        if (localData) {
-            const user = JSON.parse(localData);
-            if (user.email.toLowerCase() === emailInput) {
-                mostrarDashboard(user);
-                return;
-            }
-        }
+        btnLoginSubmit.textContent = "Buscando cuenta...";
+        btnLoginSubmit.disabled = true;
 
-        // Acceso rápido si el correo coincide con sesión previa simulada
-        const dummyUser = {
-            nombre: "Socio Ocaso", // Nombre limpio por defecto en login rápido
-            email: emailInput,
-            alergias: 'Ninguna'
-        };
-        localStorage.setItem('ocaso_user', JSON.stringify(dummyUser));
-        mostrarDashboard(dummyUser);
+        try {
+            const response = await fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: "login", correo: emailInput })
+            });
+            const result = await response.json();
+
+            if (result.status === "success") {
+                const clienteData = {
+                    nombre: result.nombre,
+                    email: emailInput,
+                    alergias: result.alergias || "Ninguna"
+                };
+                localStorage.setItem('ocaso_user', JSON.stringify(clienteData));
+                mostrarDashboard(clienteData);
+            } else {
+                // Bloqueo estricto: Si no existe, muestra el mensaje de error y no entra
+                alert(result.message || 'No encontramos una cuenta registrada con este correo.');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error de conexión con el servidor.');
+        } finally {
+            btnLoginSubmit.textContent = "Entrar a mi Cuenta";
+            btnLoginSubmit.disabled = false;
+        }
     });
 
-    // Guardar cambios de preferencias en la pestaña Preferencias
-    btnUpdatePrefs.addEventListener('click', () => {
+    // GUARDAR CAMBIOS DE PREFERENCIAS
+    btnUpdatePrefs.addEventListener('click', async () => {
         const nuevaAlergia = document.getElementById('editAlergias').value;
         let currentUser = JSON.parse(localStorage.getItem('ocaso_user') || '{}');
-        currentUser.alergias = nuevaAlergia;
-        localStorage.setItem('ocaso_user', JSON.stringify(currentUser));
-        alert('¡Preferencias actualizadas correctamente en el sistema!');
+        
+        if (!currentUser.email) {
+            alert('Sesión no válida.');
+            return;
+        }
+
+        btnUpdatePrefs.textContent = "Guardando en base de datos...";
+        btnUpdatePrefs.disabled = true;
+
+        try {
+            const response = await fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ 
+                    action: "update", 
+                    correo: currentUser.email, 
+                    alergias: nuevaAlergia 
+                })
+            });
+            const result = await response.json();
+
+            if (result.status === "success") {
+                currentUser.alergias = nuevaAlergia;
+                localStorage.setItem('ocaso_user', JSON.stringify(currentUser));
+                alert('¡Preferencias actualizadas y sincronizadas en Google Sheets!');
+            } else {
+                alert('No se pudo actualizar en la base de datos.');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error al conectar con la base de datos.');
+        } finally {
+            btnUpdatePrefs.textContent = "Guardar Cambios";
+            btnUpdatePrefs.disabled = false;
+        }
     });
 
-    // Cerrar sesión
     btnLogout.addEventListener('click', (e) => {
         e.preventDefault();
         localStorage.removeItem('ocaso_user');
@@ -119,7 +160,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('clientForm').reset();
     });
 
-    // Pestañas del Dashboard
     const tabBtns = document.querySelectorAll('.tab-btn');
     tabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -133,7 +173,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-function ejecutarRegistroCliente() {
+// REGISTRO NUEVO
+async function ejecutarRegistroCliente() {
     const nombre = document.getElementById('nombre').value.trim();
     const email = `${document.getElementById('emailUser').value.trim()}@${document.getElementById('emailDomain').value}`;
     const alergias = document.getElementById('alergias').value;
@@ -141,16 +182,41 @@ function ejecutarRegistroCliente() {
     const fechaAceptacion = new Date().toISOString();
 
     const clienteData = {
+        action: "register",
         nombre,
-        email,
-        alergias,
+        correo: email,
         telefono,
+        alergias,
         avisoPrivacidad: "VERDADERO",
         fechaAceptacion
     };
 
-    localStorage.setItem('ocaso_user', JSON.stringify(clienteData));
-    mostrarDashboard(clienteData);
+    btnOpenModal.textContent = "Registrando...";
+    
+    try {
+        const response = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify(clienteData)
+        });
+        const result = await response.json();
+
+        if (result.status === "success") {
+            const clienteCreado = {
+                nombre: result.nombre || nombre,
+                email: email,
+                alergias: result.alergias || alergias
+            };
+            localStorage.setItem('ocaso_user', JSON.stringify(clienteCreado));
+            mostrarDashboard(clienteCreado);
+        } else {
+            alert(result.message || 'Error al registrar en Google Sheets.');
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Error de red al registrar.');
+    } finally {
+        btnOpenModal.textContent = "Obtener mi Código";
+    }
 }
 
 function mostrarDashboard(user) {
@@ -158,15 +224,12 @@ function mostrarDashboard(user) {
     document.getElementById('login-view').style.display = 'none';
     document.getElementById('dashboard-view').style.display = 'block';
     
-    // Saludo con el nombre real ingresado, evitando mostrar el correo o cadenas rotas
     document.getElementById('welcomeUser').textContent = `¡Hola, ${user.nombre || 'Socio'}!`;
 
-    // Seleccionar la preferencia actual en el selector de edición
     if (user.alergias) {
         document.getElementById('editAlergias').value = user.alergias;
     }
 
-    // Generar QR único
     const qr = new QRious({
         element: document.getElementById('qrCanvas'),
         value: `OCA-${user.email}`,
@@ -180,7 +243,6 @@ function mostrarDashboard(user) {
 
 function cargarTicketsVirtuales(email) {
     const ticketsList = document.getElementById('ticketsList');
-    // Texto corregido: sin mención confusa a "este dispositivo", directo y profesional
     ticketsList.innerHTML = `
         <div class="empty-ticket-state" style="text-align: center; padding: 30px; color: #666;">
             <p>☕ Aún no tienes tickets registrados en tu cuenta.</p>
