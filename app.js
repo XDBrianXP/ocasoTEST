@@ -1,195 +1,123 @@
-// Asegúrate de usar la URL de tu proyecto
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxLgQItcfeq9SW1j70jPBy_LCdEmmsAptXRmVoH8rmCVJiEf8LCGZ2--SyknXr9ayFAvA/exec';
+document.addEventListener('DOMContentLoaded', () => {
+    const btnOpenModal = document.getElementById('btnOpenModal');
+    const privacyModal = document.getElementById('privacyModal');
+    const acceptPrivacy = document.getElementById('acceptPrivacy');
+    const btnAcceptPrivacy = document.getElementById('btnAcceptPrivacy');
+    const btnRejectPrivacy = document.getElementById('btnRejectPrivacy');
+    const clientForm = document.getElementById('clientForm');
 
-const authContainer = document.getElementById('authContainer');
-const vistaRegistro = document.getElementById('vistaRegistro');
-const vistaLogin = document.getElementById('vistaLogin');
-const seccionQR = document.getElementById('seccionQR');
-const imagenQR = document.getElementById('imagenQR');
-const mensaje = document.getElementById('mensajeSistema');
-const textoBienvenida = document.getElementById('textoBienvenida');
-const btnCerrarSesion = document.getElementById('btnCerrarSesion');
+    // Manejo del Modal de Privacidad
+    btnOpenModal.addEventListener('click', () => {
+        // Validar formulario antes de abrir modal
+        const nombre = document.getElementById('nombre').value.trim();
+        const emailUser = document.getElementById('emailUser').value.trim();
+        const emailDomain = document.getElementById('emailDomain').value;
+        const confirmEmailUser = document.getElementById('confirmEmailUser').value.trim();
+        const confirmEmailDomain = document.getElementById('confirmEmailDomain').value;
+        const alergias = document.getElementById('alergias').value;
 
-const dominiosErroneos = ['htomail.com', 'hotmial.com', 'homail.com', 'gnail.com', 'gamil.com', 'gmai.com', 'outlok.com', 'yaho.com', 'yahooo.com'];
-
-document.getElementById('tabRegistro').addEventListener('click', () => cambiarVista('registro'));
-document.getElementById('tabLogin').addEventListener('click', () => cambiarVista('login'));
-
-function cambiarVista(vista) {
-    mensaje.classList.add('oculto');
-    if (vista === 'registro') {
-        document.getElementById('tabRegistro').classList.add('active');
-        document.getElementById('tabLogin').classList.remove('active');
-        vistaRegistro.classList.remove('oculto');
-        vistaLogin.classList.add('oculto');
-    } else {
-        document.getElementById('tabLogin').classList.add('active');
-        document.getElementById('tabRegistro').classList.remove('active');
-        vistaLogin.classList.remove('oculto');
-        vistaRegistro.classList.add('oculto');
-    }
-}
-
-function validarDominioCorreo(correo) {
-    const dominio = correo.split('@')[1];
-    if (dominiosErroneos.includes(dominio)) {
-        return dominio;
-    }
-    return null;
-}
-
-function actualizarEstadisticas(visitas, bebida, alimento) {
-    document.getElementById('statVisitas').textContent = visitas;
-    document.getElementById('statBebida').textContent = bebida;
-    document.getElementById('statAlimento').textContent = alimento;
-    document.getElementById('estadisticasCliente').classList.remove('oculto');
-}
-
-// 1. REVISAR MEMORIA Y SINCRONIZAR ESTADÍSTICAS AL ABRIR LA PÁGINA
-window.onload = async function() {
-    const idGuardado = localStorage.getItem('ocasoQR');
-    const nombreGuardado = localStorage.getItem('ocasoNombre');
-    
-    if (idGuardado) {
-        // Mostramos el QR de inmediato para no hacer esperar al cliente
-        mostrarQR(idGuardado, nombreGuardado);
-
-        // Pedimos las estadísticas a la base de datos en segundo plano
-        try {
-            const response = await fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ accion: 'sync', idCliente: idGuardado })
-            });
-            const data = await response.json();
-            if (data.estatus === 'exito') {
-                actualizarEstadisticas(data.visitas, data.bebida, data.alimento);
-            }
-        } catch (e) {
-            console.log("No se pudieron cargar las estadísticas actualizadas.");
-        }
-    }
-};
-
-function mostrarQR(idCliente, nombreUsuario = "") {
-    authContainer.classList.add('oculto');
-    mensaje.classList.add('oculto');
-    
-    if(nombreUsuario) {
-        const primerNombre = nombreUsuario.split(" ")[0];
-        textoBienvenida.textContent = `¡Hola, ${primerNombre}!`;
-        btnCerrarSesion.textContent = `¿No eres ${primerNombre}? Cambiar de cuenta`;
-    } else {
-        textoBienvenida.textContent = `Tu Código de Acceso`;
-        btnCerrarSesion.textContent = `¿No eres tú? Cambiar de cuenta`;
-    }
-    
-    const urlQR = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${idCliente}&color=1B1B19&bgcolor=F7F1E8`;
-    imagenQR.src = urlQR;
-    seccionQR.classList.remove('oculto');
-}
-
-// 2. FORMULARIO DE REGISTRO
-document.getElementById('registroForm').addEventListener('submit', async function(e) {
-    e.preventDefault(); 
-    const btn = document.getElementById('btnRegistrar');
-    mensaje.classList.add('oculto');
-
-    const correoIngresado = document.getElementById('correo').value.trim().toLowerCase();
-    const dominioMalo = validarDominioCorreo(correoIngresado);
-    if (dominioMalo) {
-        mostrarError(`Parece que hay un error de dedo en "@${dominioMalo}". Por favor revisa tu correo.`);
-        return; 
-    }
-
-    btn.disabled = true;
-    btn.textContent = 'CREANDO ACCESO...';
-
-    const idGenerado = "OCA-" + new Date().getTime();
-    const nombre = document.getElementById('nombre').value;
-
-    const formData = {
-        accion: 'registro',
-        idCliente: idGenerado,
-        nombre: nombre,
-        correo: correoIngresado,
-        telefono: document.getElementById('telefono').value
-    };
-
-    try {
-        await fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(formData)
-        });
-
-        localStorage.setItem('ocasoQR', idGenerado);
-        localStorage.setItem('ocasoNombre', nombre);
-        
-        mostrarQR(idGenerado, nombre);
-        // Al ser nuevo registro, las estadísticas son 0
-        actualizarEstadisticas(0, "Ninguna", "Ninguno");
-
-    } catch (error) {
-        mostrarError('Hubo un error. Intenta de nuevo.');
-        btn.disabled = false;
-        btn.textContent = 'ORDENAR';
-    }
-});
-
-// 3. FORMULARIO DE LOGIN
-document.getElementById('loginForm').addEventListener('submit', async function(e) {
-    e.preventDefault(); 
-    const btn = document.getElementById('btnLogin');
-    mensaje.classList.add('oculto');
-
-    const correoIngresado = document.getElementById('correoLogin').value.trim().toLowerCase();
-
-    btn.disabled = true;
-    btn.textContent = 'BUSCANDO...';
-
-    const formData = {
-        accion: 'login',
-        correo: correoIngresado
-    };
-
-    try {
-        const response = await fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(formData)
-        });
-        
-        const data = await response.json();
-
-        if (data.estatus === 'exito') {
-            localStorage.setItem('ocasoQR', data.idCliente);
-            localStorage.setItem('ocasoNombre', data.nombre);
-            mostrarQR(data.idCliente, data.nombre);
-            // Sincronizamos las estadísticas devueltas por Google Sheets
-            actualizarEstadisticas(data.visitas, data.bebida, data.alimento);
-        } else {
-            mostrarError(data.mensaje);
-            btn.disabled = false;
-            btn.textContent = 'RECUPERAR QR';
+        if (!nombre || !emailUser || !emailDomain || !confirmEmailUser || !confirmEmailDomain || !alergias) {
+            alert('Por favor completa todos los campos obligatorios (*).');
+            return;
         }
 
-    } catch (error) {
-        mostrarError('Error de conexión.');
-        btn.disabled = false;
-        btn.textContent = 'RECUPERAR QR';
-    }
+        const email = `${emailUser}@${emailDomain}`;
+        const confirmEmail = `${confirmEmailUser}@${confirmEmailDomain}`;
+
+        if (email !== confirmEmail) {
+            alert('Los correos electrónicos no coinciden.');
+            return;
+        }
+
+        privacyModal.style.display = 'flex';
+    });
+
+    acceptPrivacy.addEventListener('change', (e) => {
+        btnAcceptPrivacy.disabled = !e.target.checked;
+    });
+
+    btnRejectPrivacy.addEventListener('click', () => {
+        privacyModal.style.display = 'none';
+        alert('Debes aceptar el aviso de privacidad para completar tu registro en Ocaso Club.');
+    });
+
+    btnAcceptPrivacy.addEventListener('click', () => {
+        privacyModal.style.display = 'none';
+        ejecutarRegistroCliente();
+    });
+
+    // Pestañas del Dashboard
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            tabBtns.forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            btn.classList.add('active');
+            const target = document.getElementById(btn.getAttribute('data-target'));
+            if (target) target.classList.add('active');
+        });
+    });
 });
 
-// 4. BOTÓN PARA CAMBIAR DE CUENTA
-btnCerrarSesion.addEventListener('click', function() {
-    localStorage.removeItem('ocasoQR');
-    localStorage.removeItem('ocasoNombre');
-    location.reload(); 
-});
+function ejecutarRegistroCliente() {
+    const nombre = document.getElementById('nombre').value.trim();
+    const email = `${document.getElementById('emailUser').value.trim()}@${document.getElementById('emailDomain').value}`;
+    const alergias = document.getElementById('alergias').value;
+    const telefono = document.getElementById('telefono').value.trim();
+    const fechaAceptacion = new Date().toISOString();
 
-function mostrarError(texto) {
-    mensaje.textContent = texto;
-    mensaje.style.color = '#721c24';
-    mensaje.classList.remove('oculto');
+    // Objeto con datos incluyendo la evidencia del Aviso de Privacidad y fecha/hora
+    const clienteData = {
+        nombre,
+        email,
+        alergias,
+        telefono,
+        avisoPrivacidad: "VERDADERO",
+        fechaAceptacion
+    };
+
+    // Simulación de guardado exitoso y cambio a vista Dashboard
+    localStorage.setItem('ocaso_user', JSON.stringify(clienteData));
+    mostrarDashboard(clienteData);
+}
+
+function mostrarDashboard(user) {
+    document.getElementById('registration-form').style.display = 'none';
+    document.getElementById('dashboard-view').style.display = 'block';
+    document.getElementById('welcomeUser').textContent = `¡Hola, ${user.nombre}!`;
+
+    // Generar código QR único
+    const qr = new QRious({
+        element: document.getElementById('qrCanvas'),
+        value: `OCA-${user.email}`,
+        size: 200,
+        background: '#ffffff',
+        foreground: '#1c1a17'
+    });
+
+    cargarTicketsVirtuales(user.email);
+}
+
+function cargarTicketsVirtuales(email) {
+    const ticketsList = document.getElementById('ticketsList');
+    // Aquí puedes conectar el fetch hacia tu base de datos o script de Apps Script
+    // Ejemplo simulado de ticket virtual:
+    ticketsList.innerHTML = `
+        <div class="ticket-card">
+            <div class="ticket-header">
+                <span>Ticket #91511231</span>
+                <span>11/11/2026</span>
+            </div>
+            <div class="ticket-body">
+                <p><strong>1x Carajillo Ocaso</strong> - $140.00 MXN</p>
+                <p><strong>1x Croissant de Mantequilla</strong> - $45.00 MXN</p>
+                <p class="ticket-notes"><em>Nota cocina: Poca mayonesa</em></p>
+            </div>
+            <div class="ticket-footer">
+                <span>Total: $185.00 MXN</span>
+                <span class="badge-success">Completado</span>
+            </div>
+        </div>
+    `;
 }
