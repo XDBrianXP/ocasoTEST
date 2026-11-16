@@ -183,7 +183,7 @@ async function ejecutarRegistroCliente() {
     const email = `${document.getElementById('emailUser').value.trim()}@${document.getElementById('emailDomain').value}`;
     const alergias = document.getElementById('alergias').value;
     const telefono = document.getElementById('telefono').value.trim();
-    const fechaAceptacion = new Date().toISOString();
+    const fechaAceptacion = new Date().toLocaleString("es-MX");
 
     const clienteData = {
         action: "register",
