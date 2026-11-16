@@ -4,11 +4,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const acceptPrivacy = document.getElementById('acceptPrivacy');
     const btnAcceptPrivacy = document.getElementById('btnAcceptPrivacy');
     const btnRejectPrivacy = document.getElementById('btnRejectPrivacy');
-    const clientForm = document.getElementById('clientForm');
+    
+    const showLogin = document.getElementById('showLogin');
+    const showRegister = document.getElementById('showRegister');
+    const registrationForm = document.getElementById('registration-form');
+    const loginView = document.getElementById('login-view');
+    const dashboardView = document.getElementById('dashboard-view');
+    const btnLoginSubmit = document.getElementById('btnLoginSubmit');
+    const btnLogout = document.getElementById('btnLogout');
 
-    // Manejo del Modal de Privacidad
+    // Verificar si ya hay una sesión activa en este navegador
+    const savedUser = localStorage.getItem('ocaso_user');
+    if (savedUser) {
+        mostrarDashboard(JSON.parse(savedUser));
+    }
+
+    // Cambiar a pantalla de Login
+    showLogin.addEventListener('click', (e) => {
+        e.preventDefault();
+        registrationForm.style.display = 'none';
+        loginView.style.display = 'block';
+    });
+
+    // Regresar al Registro desde Login
+    showRegister.addEventListener('click', (e) => {
+        e.preventDefault();
+        loginView.style.display = 'none';
+        registrationForm.style.display = 'block';
+    });
+
+    // Validar formulario de registro y abrir modal de privacidad
     btnOpenModal.addEventListener('click', () => {
-        // Validar formulario antes de abrir modal
         const nombre = document.getElementById('nombre').value.trim();
         const emailUser = document.getElementById('emailUser').value.trim();
         const emailDomain = document.getElementById('emailDomain').value;
@@ -41,9 +67,47 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Debes aceptar el aviso de privacidad para completar tu registro en Ocaso Club.');
     });
 
+    // Al aceptar privacidad, guardamos y registramos
     btnAcceptPrivacy.addEventListener('click', () => {
         privacyModal.style.display = 'none';
         ejecutarRegistroCliente();
+    });
+
+    // Iniciar sesión con correo existente
+    btnLoginSubmit.addEventListener('click', () => {
+        const emailInput = document.getElementById('loginEmail').value.trim().toLowerCase();
+        if (!emailInput) {
+            alert('Por favor ingresa tu correo electrónico.');
+            return;
+        }
+
+        // Buscamos si existe en localStorage o simulamos acceso
+        const localData = localStorage.getItem('ocaso_user');
+        if (localData) {
+            const user = JSON.parse(localData);
+            if (user.email.toLowerCase() === emailInput) {
+                mostrarDashboard(user);
+                return;
+            }
+        }
+
+        // Si no está guardado localmente, permitimos acceso creando sesión rápida con ese correo
+        const dummyUser = {
+            nombre: emailInput.split('@')[0],
+            email: emailInput,
+            alergias: 'Ninguna'
+        };
+        localStorage.setItem('ocaso_user', JSON.stringify(dummyUser));
+        mostrarDashboard(dummyUser);
+    });
+
+    // Cerrar sesión
+    btnLogout.addEventListener('click', (e) => {
+        e.preventDefault();
+        localStorage.removeItem('ocaso_user');
+        dashboardView.style.display = 'none';
+        registrationForm.style.display = 'block';
+        document.getElementById('clientForm').reset();
     });
 
     // Pestañas del Dashboard
@@ -67,7 +131,6 @@ function ejecutarRegistroCliente() {
     const telefono = document.getElementById('telefono').value.trim();
     const fechaAceptacion = new Date().toISOString();
 
-    // Objeto con datos incluyendo la evidencia del Aviso de Privacidad y fecha/hora
     const clienteData = {
         nombre,
         email,
@@ -77,17 +140,17 @@ function ejecutarRegistroCliente() {
         fechaAceptacion
     };
 
-    // Simulación de guardado exitoso y cambio a vista Dashboard
     localStorage.setItem('ocaso_user', JSON.stringify(clienteData));
     mostrarDashboard(clienteData);
 }
 
 function mostrarDashboard(user) {
     document.getElementById('registration-form').style.display = 'none';
+    document.getElementById('login-view').style.display = 'none';
     document.getElementById('dashboard-view').style.display = 'block';
     document.getElementById('welcomeUser').textContent = `¡Hola, ${user.nombre}!`;
 
-    // Generar código QR único
+    // Generar QR único
     const qr = new QRious({
         element: document.getElementById('qrCanvas'),
         value: `OCA-${user.email}`,
@@ -101,23 +164,11 @@ function mostrarDashboard(user) {
 
 function cargarTicketsVirtuales(email) {
     const ticketsList = document.getElementById('ticketsList');
-    // Aquí puedes conectar el fetch hacia tu base de datos o script de Apps Script
-    // Ejemplo simulado de ticket virtual:
+    // Sin tickets fantasma: muestra estado limpio vacío listo para compras reales
     ticketsList.innerHTML = `
-        <div class="ticket-card">
-            <div class="ticket-header">
-                <span>Ticket #91511231</span>
-                <span>11/11/2026</span>
-            </div>
-            <div class="ticket-body">
-                <p><strong>1x Carajillo Ocaso</strong> - $140.00 MXN</p>
-                <p><strong>1x Croissant de Mantequilla</strong> - $45.00 MXN</p>
-                <p class="ticket-notes"><em>Nota cocina: Poca mayonesa</em></p>
-            </div>
-            <div class="ticket-footer">
-                <span>Total: $185.00 MXN</span>
-                <span class="badge-success">Completado</span>
-            </div>
+        <div class="empty-ticket-state" style="text-align: center; padding: 30px; color: #666;">
+            <p>☕ Aún no tienes tickets registrados en este dispositivo.</p>
+            <p style="font-size: 13px; margin-top: 8px;">Tus consumos en cafetería aparecerán aquí automáticamente.</p>
         </div>
     `;
 }
