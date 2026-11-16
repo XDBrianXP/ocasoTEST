@@ -1,4 +1,4 @@
-// URL OFICIAL DE TU WEB APP EN GOOGLE APPS SCRIPT (EL PUENTE)
+// URL OFICIAL DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLgQItcfeq9SW1j70jPBy_LCdEmmsAptXRMVoH8rmCVJiEf8LCGZ2--SyknXr9a.../exec";
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -190,6 +190,7 @@ async function ejecutarRegistroCliente() {
         fechaAceptacion
     };
 
+    const btnOpenModal = document.getElementById('btnOpenModal');
     btnOpenModal.textContent = "Registrando...";
     
     try {
@@ -236,16 +237,4 @@ function mostrarDashboard(user) {
         background: '#ffffff',
         foreground: '#1c1a17'
     });
-
-    cargarTicketsVirtuales(user.email);
-}
-
-function cargarTicketsVirtuales(email) {
-    const ticketsList = document.getElementById('ticketsList');
-    ticketsList.innerHTML = `
-        <div class="empty-ticket-state" style="text-align: center; padding: 30px; color: #666;">
-            <p>☕ Aún no tienes tickets registrados en tu cuenta.</p>
-            <p style="font-size: 13px; margin-top: 8px;">Tus consumos en cafetería aparecerán aquí automáticamente.</p>
-        </div>
-    `;
 }
