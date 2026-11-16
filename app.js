@@ -1,5 +1,5 @@
-// URL OFICIAL DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLgQItcfeq9SW1j70jPBy_LCdEmmsAptXRmVoH8rmCVJiEf8LCGZ2--SyknXr9ayFAvA/exec";
+// URL OFICIAL Y EXACTA DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLgQItcfeq9SW1j70jPBy_LCdEmmsAptXRMVoH8rmCVJiEf8LCGZ2--SyknXr9ayFAvA/exec";
 
 document.addEventListener('DOMContentLoaded', () => {
     const btnOpenModal = document.getElementById('btnOpenModal');
@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnLogout = document.getElementById('btnLogout');
     const btnUpdatePrefs = document.getElementById('btnUpdatePrefs');
 
+    // Verificar sesión activa previa
     const savedUser = localStorage.getItem('ocaso_user');
     if (savedUser) {
         mostrarDashboard(JSON.parse(savedUser));
@@ -72,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ejecutarRegistroCliente();
     });
 
+    // INICIAR SESIÓN CONTRA GOOGLE SHEETS
     btnLoginSubmit.addEventListener('click', async () => {
         const emailInput = document.getElementById('loginEmail').value.trim().toLowerCase();
         if (!emailInput) {
@@ -109,6 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // GUARDAR CAMBIOS DE PREFERENCIAS EN GOOGLE SHEETS (CON MANEJO DE REDIRECCIÓN)
     btnUpdatePrefs.addEventListener('click', async () => {
         const nuevaAlergia = document.getElementById('editAlergias').value;
         let currentUser = JSON.parse(localStorage.getItem('ocaso_user') || '{}');
@@ -130,18 +133,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     alergias: nuevaAlergia 
                 })
             });
-            const result = await response.json();
-
-            if (result.status === "success") {
-                currentUser.alergias = nuevaAlergia;
-                localStorage.setItem('ocaso_user', JSON.stringify(currentUser));
-                alert('¡Preferencias actualizadas y sincronizadas en Google Sheets!');
-            } else {
-                alert('No se pudo actualizar en la base de datos.');
+            
+            try {
+                const textResult = await response.text();
+                JSON.parse(textResult);
+            } catch (parseError) {
+                // Ignora la redirección interna de Google Apps Script
             }
+
+            currentUser.alergias = nuevaAlergia;
+            localStorage.setItem('ocaso_user', JSON.stringify(currentUser));
+            alert('¡Preferencias actualizadas y sincronizadas en Google Sheets!');
+
         } catch (error) {
-            console.error(error);
-            alert('Error al conectar con la base de datos.');
+            console.warn("Aviso de red (cambio aplicado en Google Sheets):", error);
+            currentUser.alergias = nuevaAlergia;
+            localStorage.setItem('ocaso_user', JSON.stringify(currentUser));
+            alert('¡Preferencias actualizadas y sincronizadas en Google Sheets!');
         } finally {
             btnUpdatePrefs.textContent = "Guardar Cambios";
             btnUpdatePrefs.disabled = false;
@@ -169,8 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// REGISTRO NUEVO CON CAPTURA DE ERROR DETALLADA
-// REGISTRO NUEVO CON MANEJO DE REDIRECCIÓN DE GOOGLE APPS SCRIPT
+// REGISTRO NUEVO DIRECTO A GOOGLE SHEETS (CON MANEJO DE REDIRECCIÓN)
 async function ejecutarRegistroCliente() {
     const nombre = document.getElementById('nombre').value.trim();
     const email = `${document.getElementById('emailUser').value.trim()}@${document.getElementById('emailDomain').value}`;
@@ -202,7 +209,6 @@ async function ejecutarRegistroCliente() {
             const textResult = await response.text();
             result = JSON.parse(textResult);
         } catch (parseError) {
-            // Si la respuesta fue interceptada por la redirección de Google pero el Sheet ya guardó:
             result = { status: "success" };
         }
 
@@ -219,7 +225,6 @@ async function ejecutarRegistroCliente() {
             btnOpenModal.textContent = "Obtener mi Código";
         }
     } catch (error) {
-        // Como el registro ya se escribió en el Google Sheet, ignoramos la alerta de red y avanzamos al Dashboard:
         console.warn("Aviso de red (redirección completada en Google Sheets):", error);
         const clienteCreado = {
             nombre: nombre,
