@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnLogout = document.getElementById('btnLogout');
     const btnUpdatePrefs = document.getElementById('btnUpdatePrefs');
 
-    // Verificar sesión activa previa
     const savedUser = localStorage.getItem('ocaso_user');
     if (savedUser) {
         mostrarDashboard(JSON.parse(savedUser));
@@ -73,7 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ejecutarRegistroCliente();
     });
 
-    // INICIAR SESIÓN CONTRA GOOGLE SHEETS
     btnLoginSubmit.addEventListener('click', async () => {
         const emailInput = document.getElementById('loginEmail').value.trim().toLowerCase();
         if (!emailInput) {
@@ -111,7 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // GUARDAR CAMBIOS DE PREFERENCIAS EN GOOGLE SHEETS
     btnUpdatePrefs.addEventListener('click', async () => {
         const nuevaAlergia = document.getElementById('editAlergias').value;
         let currentUser = JSON.parse(localStorage.getItem('ocaso_user') || '{}');
@@ -172,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// REGISTRO NUEVO DIRECTO A GOOGLE SHEETS
+// REGISTRO NUEVO CON CAPTURA DE ERROR DETALLADA
 async function ejecutarRegistroCliente() {
     const nombre = document.getElementById('nombre').value.trim();
     const email = `${document.getElementById('emailUser').value.trim()}@${document.getElementById('emailDomain').value}`;
@@ -209,11 +206,12 @@ async function ejecutarRegistroCliente() {
             localStorage.setItem('ocaso_user', JSON.stringify(clienteCreado));
             mostrarDashboard(clienteCreado);
         } else {
-            alert(result.message || 'Error al registrar en Google Sheets.');
+            // Muestra el mensaje exacto que viene del Apps Script
+            alert('Detalle del servidor: ' + (result.message || 'Error desconocido'));
         }
     } catch (error) {
-        console.error(error);
-        alert('Error de red al registrar.');
+        console.error("Error técnico:", error);
+        alert('Error técnico detallado: ' + error.message);
     } finally {
         btnOpenModal.textContent = "Obtener mi Código";
     }
