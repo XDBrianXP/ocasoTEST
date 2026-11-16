@@ -12,8 +12,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const dashboardView = document.getElementById('dashboard-view');
     const btnLoginSubmit = document.getElementById('btnLoginSubmit');
     const btnLogout = document.getElementById('btnLogout');
+    const btnUpdatePrefs = document.getElementById('btnUpdatePrefs');
 
-    // Verificar si ya hay una sesión activa en este navegador
+    // Verificar si ya hay una sesión activa
     const savedUser = localStorage.getItem('ocaso_user');
     if (savedUser) {
         mostrarDashboard(JSON.parse(savedUser));
@@ -81,7 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Buscamos si existe en localStorage o simulamos acceso
         const localData = localStorage.getItem('ocaso_user');
         if (localData) {
             const user = JSON.parse(localData);
@@ -91,14 +91,23 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Si no está guardado localmente, permitimos acceso creando sesión rápida con ese correo
+        // Acceso rápido si el correo coincide con sesión previa simulada
         const dummyUser = {
-            nombre: emailInput.split('@')[0],
+            nombre: "Socio Ocaso", // Nombre limpio por defecto en login rápido
             email: emailInput,
             alergias: 'Ninguna'
         };
         localStorage.setItem('ocaso_user', JSON.stringify(dummyUser));
         mostrarDashboard(dummyUser);
+    });
+
+    // Guardar cambios de preferencias en la pestaña Preferencias
+    btnUpdatePrefs.addEventListener('click', () => {
+        const nuevaAlergia = document.getElementById('editAlergias').value;
+        let currentUser = JSON.parse(localStorage.getItem('ocaso_user') || '{}');
+        currentUser.alergias = nuevaAlergia;
+        localStorage.setItem('ocaso_user', JSON.stringify(currentUser));
+        alert('¡Preferencias actualizadas correctamente en el sistema!');
     });
 
     // Cerrar sesión
@@ -148,7 +157,14 @@ function mostrarDashboard(user) {
     document.getElementById('registration-form').style.display = 'none';
     document.getElementById('login-view').style.display = 'none';
     document.getElementById('dashboard-view').style.display = 'block';
-    document.getElementById('welcomeUser').textContent = `¡Hola, ${user.nombre}!`;
+    
+    // Saludo con el nombre real ingresado, evitando mostrar el correo o cadenas rotas
+    document.getElementById('welcomeUser').textContent = `¡Hola, ${user.nombre || 'Socio'}!`;
+
+    // Seleccionar la preferencia actual en el selector de edición
+    if (user.alergias) {
+        document.getElementById('editAlergias').value = user.alergias;
+    }
 
     // Generar QR único
     const qr = new QRious({
@@ -164,10 +180,10 @@ function mostrarDashboard(user) {
 
 function cargarTicketsVirtuales(email) {
     const ticketsList = document.getElementById('ticketsList');
-    // Sin tickets fantasma: muestra estado limpio vacío listo para compras reales
+    // Texto corregido: sin mención confusa a "este dispositivo", directo y profesional
     ticketsList.innerHTML = `
         <div class="empty-ticket-state" style="text-align: center; padding: 30px; color: #666;">
-            <p>☕ Aún no tienes tickets registrados en este dispositivo.</p>
+            <p>☕ Aún no tienes tickets registrados en tu cuenta.</p>
             <p style="font-size: 13px; margin-top: 8px;">Tus consumos en cafetería aparecerán aquí automáticamente.</p>
         </div>
     `;
