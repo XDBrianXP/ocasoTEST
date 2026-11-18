@@ -6,10 +6,9 @@
     --ambar-interfaz: #D9873F;
     --carbon-profundo: #1B1B19;
     --marfil-digital: #F7F1E8;
+    --crema-ritual: #FAF6F0;
+    --borde-ritual: #EAE2D6;
     --nogal-tostado: #68452F;
-    --terracota: #B96438;
-    --verde-botanico: #485442;
-    --azul-horizonte: #4A6884;
 }
 
 * {
@@ -24,38 +23,65 @@ body {
     color: var(--carbon-profundo);
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     min-height: 100vh;
+    padding: 20px 12px;
 }
 
-.card {
-    background-color: white;
-    padding: 25px;
-    border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+.main-wrapper {
     width: 100%;
-    max-width: 480px;
-    margin: 20px;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
+/* ==========================================
+   ENCABEZADO SUPERIOR APROBADO
+   ========================================== */
 .card-header {
     background-color: var(--carbon-profundo);
-    color: var(--marfil-digital);
-    padding: 25px 20px;
-    border-radius: 15px;
-    margin-bottom: 20px;
-    text-align: center;
+    color: #ffffff;
+    width: 100%;
+    padding: 24px 22px;
+    border-radius: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    z-index: 2;
 }
 
-.card-header h2 {
-    font-size: 24px;
-    letter-spacing: 2px;
-    margin-bottom: 5px;
+.header-text h2 {
+    font-size: 22px;
+    letter-spacing: 2.5px;
+    font-weight: 800;
+    margin-bottom: 6px;
 }
 
-.card-header p {
-    font-size: 14px;
-    color: var(--ambar-ocaso);
+.header-text p {
+    font-size: 13.5px;
+    color: var(--ambar-interfaz);
+}
+
+.status-dot {
+    width: 9px;
+    height: 9px;
+    background-color: var(--ambar-interfaz);
+    border-radius: 50%;
+    margin-top: 4px;
+}
+
+/* ==========================================
+   TARJETA PRINCIPAL INFERIOR
+   ========================================== */
+.card {
+    background-color: #ffffff;
+    width: 92%;
+    padding: 26px 22px;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    z-index: 1;
 }
 
 .form-group {
@@ -78,7 +104,7 @@ body {
     border-radius: 10px;
     background-color: var(--marfil-digital);
     color: var(--carbon-profundo);
-    font-size: 16px;
+    font-size: 15px;
 }
 
 .form-group input:focus, 
@@ -145,45 +171,47 @@ body {
     text-decoration: underline;
 }
 
+.logout-link {
+    color: #c94a4a !important;
+    font-size: 13.5px !important;
+}
+
 /* ==========================================
-   DASHBOARD Y TABS
+   DASHBOARD Y PESTAÑAS
    ========================================== */
 .user-greeting {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 14px;
 }
 
 .user-greeting h3 {
-    color: var(--carbon-profundo);
-    font-size: 20px;
-}
-
-.user-greeting p {
-    color: var(--nogal-tostado);
-    font-size: 14px;
+    color: var(--ambar-interfaz);
+    font-size: 23px;
+    font-weight: 800;
 }
 
 .nav-tabs {
     display: flex;
-    gap: 5px;
-    margin-bottom: 20px;
-    border-bottom: 2px solid #ddd;
+    gap: 8px;
+    margin-bottom: 18px;
+    border-bottom: 1.5px solid #eee;
 }
 
 .tab-btn {
     flex: 1;
     background: none;
     border: none;
-    padding: 10px;
+    padding: 10px 6px;
     font-weight: bold;
-    color: #666;
+    color: #777;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 13.5px;
+    transition: 0.2s;
 }
 
 .tab-btn.active {
     color: var(--ambar-interfaz);
-    border-bottom: 3px solid var(--ambar-interfaz);
+    border-bottom: 2.5px solid var(--ambar-interfaz);
 }
 
 .tab-content {
@@ -197,13 +225,132 @@ body {
 .qr-container {
     display: flex;
     justify-content: center;
-    margin: 20px 0;
+    margin: 10px 0 14px 0;
 }
 
 .qr-instructions {
     text-align: center;
+    font-size: 14.5px;
+    color: #555;
+    margin-bottom: 22px;
+}
+
+/* ==========================================
+   TARJETA: TU RITUAL DE CONSUMO
+   ========================================== */
+.ritual-box {
+    background-color: var(--crema-ritual);
+    border: 1px solid var(--borde-ritual);
+    border-radius: 14px;
+    padding: 18px;
+}
+
+.ritual-box h4 {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--carbon-profundo);
+    margin-bottom: 14px;
+}
+
+.ritual-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    font-size: 14.5px;
+}
+
+.ritual-label {
+    color: #6c6860;
+    line-height: 1.35;
+}
+
+.ritual-value {
+    font-weight: 700;
+    color: var(--carbon-profundo);
+    text-align: right;
+    max-width: 58%;
+    line-height: 1.35;
+}
+
+.ritual-divider {
+    border: none;
+    border-top: 1px solid var(--borde-ritual);
+    margin: 12px 0;
+}
+
+.edit-notes-wrapper {
+    text-align: right;
+    margin-top: 8px;
+}
+
+.edit-notes-link {
+    color: var(--ambar-interfaz);
+    font-size: 13.5px;
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+.edit-notas-box {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--borde-ritual);
+}
+
+.edit-notas-box select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-color: #fff;
     font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.edit-notas-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.btn-cancel-notes {
+    background: #e0dcd5;
+    color: #333;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-save-notes {
+    background: var(--ambar-interfaz);
+    color: var(--carbon-profundo);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* ==========================================
+   TICKETS VIRTUALES
+   ========================================== */
+.empty-ticket-state {
+    text-align: center;
+    padding: 35px 15px;
     color: #666;
+    background-color: var(--crema-ritual);
+    border: 1px solid var(--borde-ritual);
+    border-radius: 14px;
+}
+
+.empty-ticket-sub {
+    font-size: 13px;
+    margin-top: 8px;
+    color: #888;
 }
 
 /* ==========================================

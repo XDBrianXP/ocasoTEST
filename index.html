@@ -9,127 +9,164 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="card">
+    <div class="main-wrapper">
+        <!-- ENCABEZADO SUPERIOR APROBADO -->
         <div class="card-header">
-            <h2>OCASO</h2>
-            <p>Tu momento. Tu café. Tu pausa.</p>
+            <div class="header-text">
+                <h2>OCASO</h2>
+                <p>Tu momento. Tu café. Tu pausa.</p>
+            </div>
+            <span class="status-dot"></span>
         </div>
 
-        <!-- FORMULARIO DE REGISTRO -->
-        <div id="registration-form">
-            <form id="clientForm">
-                <div class="form-group">
-                    <label>Nombre Completo *</label>
-                    <input type="text" id="nombre" required placeholder="Tu nombre y apellido">
-                </div>
-                <div class="form-group">
-                    <label>Correo Electrónico *</label>
-                    <div class="email-row">
-                        <input type="text" id="emailUser" required placeholder="usuario">
-                        <span>@</span>
-                        <select id="emailDomain" required>
-                            <option value="">Selecciona...</option>
-                            <option value="gmail.com">gmail.com</option>
-                            <option value="outlook.com">outlook.com</option>
-                            <option value="yahoo.com">yahoo.com</option>
-                            <option value="hotmail.com">hotmail.com</option>
-                            <option value="icloud.com">icloud.com</option>
+        <!-- TARJETA BLANCA PRINCIPAL -->
+        <div class="card">
+            <!-- FORMULARIO DE REGISTRO -->
+            <div id="registration-form">
+                <form id="clientForm">
+                    <div class="form-group">
+                        <label>Nombre Completo *</label>
+                        <input type="text" id="nombre" required placeholder="Tu nombre y apellido">
+                    </div>
+                    <div class="form-group">
+                        <label>Correo Electrónico *</label>
+                        <div class="email-row">
+                            <input type="text" id="emailUser" required placeholder="usuario">
+                            <span>@</span>
+                            <select id="emailDomain" required>
+                                <option value="">Selecciona...</option>
+                                <option value="gmail.com">gmail.com</option>
+                                <option value="outlook.com">outlook.com</option>
+                                <option value="yahoo.com">yahoo.com</option>
+                                <option value="hotmail.com">hotmail.com</option>
+                                <option value="icloud.com">icloud.com</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Confirmar Correo *</label>
+                        <div class="email-row">
+                            <input type="text" id="confirmEmailUser" required placeholder="usuario">
+                            <span>@</span>
+                            <select id="confirmEmailDomain" required>
+                                <option value="">Selecciona...</option>
+                                <option value="gmail.com">gmail.com</option>
+                                <option value="outlook.com">outlook.com</option>
+                                <option value="yahoo.com">yahoo.com</option>
+                                <option value="hotmail.com">hotmail.com</option>
+                                <option value="icloud.com">icloud.com</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Alergias o Preferencias *</label>
+                        <select id="alergias" required>
+                            <option value="">Selecciona tus preferencias</option>
+                            <option value="Ninguna">Ninguna</option>
+                            <option value="Intolerancia a la lactosa">Intolerancia a la lactosa</option>
+                            <option value="Alergia a la nuez / frutos secos">Alergia a la nuez / frutos secos</option>
+                            <option value="Vegano">Vegano</option>
+                            <option value="Sin azúcar / Keto">Sin azúcar / Keto</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label>Teléfono (Opcional)</label>
+                        <input type="tel" id="telefono" placeholder="4421234567">
+                    </div>
+                    <button type="button" id="btnOpenModal" class="submit-btn">Obtener mi Código</button>
+                </form>
+                <div class="footer-link">
+                    <a href="#" id="showLogin">¿Ya eres miembro? Inicia sesión aquí</a>
                 </div>
+            </div>
+
+            <!-- FORMULARIO DE INICIO DE SESIÓN -->
+            <div id="login-view" style="display: none;">
                 <div class="form-group">
-                    <label>Confirmar Correo *</label>
-                    <div class="email-row">
-                        <input type="text" id="confirmEmailUser" required placeholder="usuario">
-                        <span>@</span>
-                        <select id="confirmEmailDomain" required>
-                            <option value="">Selecciona...</option>
-                            <option value="gmail.com">gmail.com</option>
-                            <option value="outlook.com">outlook.com</option>
-                            <option value="yahoo.com">yahoo.com</option>
-                            <option value="hotmail.com">hotmail.com</option>
-                            <option value="icloud.com">icloud.com</option>
-                        </select>
+                    <label>Ingresa tu correo registrado *</label>
+                    <input type="email" id="loginEmail" placeholder="tucorreo@gmail.com">
+                </div>
+                <button type="button" id="btnLoginSubmit" class="submit-btn">Entrar a mi Cuenta</button>
+                <div class="footer-link">
+                    <a href="#" id="showRegister">¿No tienes cuenta? Regístrate aquí</a>
+                </div>
+            </div>
+
+            <!-- VISTA DASHBOARD APROBADA + PESTAÑA TICKETS VIRTUALES -->
+            <div id="dashboard-view" style="display: none;">
+                <div class="user-greeting">
+                    <h3 id="welcomeUser">¡Hola!</h3>
+                </div>
+                
+                <!-- PESTAÑAS: MI CÓDIGO QR Y TICKETS VIRTUALES -->
+                <div class="nav-tabs">
+                    <button class="tab-btn active" data-target="tab-qr">Mi Código QR</button>
+                    <button class="tab-btn" data-target="tab-tickets">Tickets Virtuales</button>
+                </div>
+
+                <!-- PESTAÑA 1: QR + TU RITUAL DE CONSUMO -->
+                <div id="tab-qr" class="tab-content active">
+                    <div class="qr-container">
+                        <canvas id="qrCanvas"></canvas>
+                    </div>
+                    <p class="qr-instructions">Muéstralo en la barra para ordenar</p>
+
+                    <div class="ritual-box">
+                        <h4>Tu Ritual de Consumo</h4>
+                        <div class="ritual-row">
+                            <span class="ritual-label">Visitas totales:</span>
+                            <span class="ritual-value" id="valVisitas">0</span>
+                        </div>
+                        <div class="ritual-row">
+                            <span class="ritual-label">Bebida favorita:</span>
+                            <span class="ritual-value" id="valBebida">Ninguna</span>
+                        </div>
+                        <div class="ritual-row">
+                            <span class="ritual-label">Alimento favorito:</span>
+                            <span class="ritual-value" id="valAlimento">Ninguna</span>
+                        </div>
+                        
+                        <hr class="ritual-divider">
+                        
+                        <div class="ritual-row">
+                            <span class="ritual-label">Nota para el<br>barista:</span>
+                            <span class="ritual-value ritual-note" id="valNotas">Ninguna</span>
+                        </div>
+                        
+                        <div class="edit-notes-wrapper">
+                            <a href="#" id="btnToggleEditNotas" class="edit-notes-link">Editar notas</a>
+                        </div>
+
+                        <!-- DESPLEGABLE INTERNO PARA EDITAR NOTAS -->
+                        <div id="editNotasContainer" class="edit-notas-box" style="display: none;">
+                            <select id="editAlergias">
+                                <option value="Ninguna">Ninguna</option>
+                                <option value="Intolerancia a la lactosa">Intolerancia a la lactosa</option>
+                                <option value="Alergia a la nuez / frutos secos">Alergia a la nuez / frutos secos</option>
+                                <option value="Vegano">Vegano</option>
+                                <option value="Sin azúcar / Keto">Sin azúcar / Keto</option>
+                            </select>
+                            <div class="edit-notas-actions">
+                                <button type="button" id="btnCancelEditNotas" class="btn-cancel-notes">Cancelar</button>
+                                <button type="button" id="btnUpdatePrefs" class="btn-save-notes">Guardar</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>Alergias o Preferencias *</label>
-                    <select id="alergias" required>
-                        <option value="">Selecciona tus preferencias</option>
-                        <option value="Ninguna">Ninguna</option>
-                        <option value="Intolerancia a la lactosa">Intolerancia a la lactosa</option>
-                        <option value="Alergia a la nuez / frutos secos">Alergia a la nuez / frutos secos</option>
-                        <option value="Vegano">Vegano</option>
-                        <option value="Sin azúcar / Keto">Sin azúcar / Keto</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Teléfono (Opcional)</label>
-                    <input type="tel" id="telefono" placeholder="4421234567">
-                </div>
-                <button type="button" id="btnOpenModal" class="submit-btn">Obtener mi Código</button>
-            </form>
-            <div class="footer-link">
-                <a href="#" id="showLogin">¿Ya eres miembro? Inicia sesión aquí</a>
-            </div>
-        </div>
 
-        <!-- FORMULARIO DE INICIO DE SESIÓN -->
-        <div id="login-view" style="display: none;">
-            <div class="form-group">
-                <label>Ingresa tu correo registrado *</label>
-                <input type="email" id="loginEmail" placeholder="tucorreo@gmail.com">
-            </div>
-            <button type="button" id="btnLoginSubmit" class="submit-btn">Entrar a mi Cuenta</button>
-            <div class="footer-link">
-                <a href="#" id="showRegister">¿No tienes cuenta? Regístrate aquí</a>
-            </div>
-        </div>
-
-        <!-- VISTA DASHBOARD / MI TARJETA -->
-        <div id="dashboard-view" style="display: none;">
-            <div class="user-greeting">
-                <h3 id="welcomeUser">¡Hola!</h3>
-                <p>Tu tarjeta digital Ocaso Club</p>
-            </div>
-            
-            <div class="nav-tabs">
-                <button class="tab-btn active" data-target="tab-qr">Mi Código QR</button>
-                <button class="tab-btn" data-target="tab-tickets">Tickets Virtuales</button>
-                <button class="tab-btn" data-target="tab-prefs">Preferencias</button>
-            </div>
-
-            <div id="tab-qr" class="tab-content active">
-                <div class="qr-container">
-                    <canvas id="qrCanvas"></canvas>
-                </div>
-                <p class="qr-instructions">Muestra este código para acumular visitas y beneficios VIP.</p>
-            </div>
-
-            <div id="tab-tickets" class="tab-content">
-                <div class="tickets-container" id="ticketsList">
-                    <div class="empty-ticket-state" style="text-align: center; padding: 30px; color: #666;">
-                        <p>☕ Aún no tienes tickets registrados en tu cuenta.</p>
-                        <p style="font-size: 13px; margin-top: 8px;">Tus consumos en cafetería aparecerán aquí automáticamente.</p>
+                <!-- PESTAÑA 2: TICKETS VIRTUALES -->
+                <div id="tab-tickets" class="tab-content">
+                    <div class="tickets-container" id="ticketsList">
+                        <div class="empty-ticket-state">
+                            <p>☕ Aún no tienes tickets registrados en tu cuenta.</p>
+                            <p class="empty-ticket-sub">Tus consumos en cafetería aparecerán aquí automáticamente.</p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div id="tab-prefs" class="tab-content">
-                <div class="form-group">
-                    <label>Actualizar Alergias / Preferencias</label>
-                    <select id="editAlergias">
-                        <option value="Ninguna">Ninguna</option>
-                        <option value="Intolerancia a la lactosa">Intolerancia a la lactosa</option>
-                        <option value="Alergia a la nuez / frutos secos">Alergia a la nuez / frutos secos</option>
-                        <option value="Vegano">Vegano</option>
-                        <option value="Sin azúcar / Keto">Sin azúcar / Keto</option>
-                    </select>
+                <div class="footer-link" style="margin-top: 22px;">
+                    <a href="#" id="btnLogout" class="logout-link">Cerrar Sesión</a>
                 </div>
-                <button type="button" id="btnUpdatePrefs" class="submit-btn">Guardar Cambios</button>
-            </div>
-            <div class="footer-link" style="margin-top: 20px;">
-                <a href="#" id="btnLogout" style="color: #d9534f;">Cerrar Sesión</a>
             </div>
         </div>
     </div>

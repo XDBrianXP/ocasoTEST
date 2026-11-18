@@ -15,6 +15,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const dashboardView = document.getElementById('dashboard-view');
     const btnLoginSubmit = document.getElementById('btnLoginSubmit');
     const btnLogout = document.getElementById('btnLogout');
+    
+    const btnToggleEditNotas = document.getElementById('btnToggleEditNotas');
+    const editNotasContainer = document.getElementById('editNotasContainer');
+    const btnCancelEditNotas = document.getElementById('btnCancelEditNotas');
     const btnUpdatePrefs = document.getElementById('btnUpdatePrefs');
 
     // Verificar sesión activa previa
@@ -73,6 +77,16 @@ document.addEventListener('DOMContentLoaded', () => {
         ejecutarRegistroCliente();
     });
 
+    // ABRIR Y CERRAR EDICIÓN DE NOTAS EN "TU RITUAL DE CONSUMO"
+    btnToggleEditNotas.addEventListener('click', (e) => {
+        e.preventDefault();
+        editNotasContainer.style.display = editNotasContainer.style.display === 'none' ? 'block' : 'none';
+    });
+
+    btnCancelEditNotas.addEventListener('click', () => {
+        editNotasContainer.style.display = 'none';
+    });
+
     // INICIAR SESIÓN CONTRA GOOGLE SHEETS
     btnLoginSubmit.addEventListener('click', async () => {
         const emailInput = document.getElementById('loginEmail').value.trim().toLowerCase();
@@ -99,6 +113,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     nombre: result.nombre,
                     email: emailInput,
                     qrCode: result.qrCode,
+                    visitas: result.visitas !== undefined ? result.visitas : 0,
+                    bebida: result.bebida || "Ninguna",
+                    alimento: result.alimento || "Ninguna",
                     alergias: result.alergias || "Ninguna"
                 };
                 localStorage.setItem('ocaso_user', JSON.stringify(clienteData));
@@ -115,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // GUARDAR CAMBIOS DE PREFERENCIAS EN GOOGLE SHEETS
+    // GUARDAR CAMBIOS DE NOTAS EN GOOGLE SHEETS
     btnUpdatePrefs.addEventListener('click', async () => {
         const nuevaAlergia = document.getElementById('editAlergias').value;
         let currentUser = JSON.parse(localStorage.getItem('ocaso_user') || '{}');
@@ -125,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        btnUpdatePrefs.textContent = "Guardando en base de datos...";
+        btnUpdatePrefs.textContent = "Guardando...";
         btnUpdatePrefs.disabled = true;
 
         try {
@@ -145,7 +162,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.status === "success") {
                 currentUser.alergias = nuevaAlergia;
                 localStorage.setItem('ocaso_user', JSON.stringify(currentUser));
-                alert('¡Preferencias actualizadas y sincronizadas en Google Sheets!');
+                document.getElementById('valNotas').textContent = nuevaAlergia;
+                editNotasContainer.style.display = 'none';
+                alert('¡Nota para el barista actualizada!');
             } else {
                 alert(result.message || 'No se pudo actualizar en la base de datos.');
             }
@@ -153,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(error);
             alert('Error al conectar con la base de datos.');
         } finally {
-            btnUpdatePrefs.textContent = "Guardar Cambios";
+            btnUpdatePrefs.textContent = "Guardar";
             btnUpdatePrefs.disabled = false;
         }
     });
@@ -216,6 +235,9 @@ async function ejecutarRegistroCliente() {
                 nombre: result.nombre || nombre,
                 email: email,
                 qrCode: result.qrCode,
+                visitas: 0,
+                bebida: "Ninguna",
+                alimento: "Ninguna",
                 alergias: result.alergias || alergias
             };
             localStorage.setItem('ocaso_user', JSON.stringify(clienteCreado));
@@ -237,16 +259,24 @@ function mostrarDashboard(user) {
     document.getElementById('login-view').style.display = 'none';
     document.getElementById('dashboard-view').style.display = 'block';
     
-    document.getElementById('welcomeUser').textContent = `¡Hola, ${user.nombre || 'Socio'}!`;
+    // Extrae solo el primer nombre para mostrar "¡Hola, Mauricio!" como en el diseño aprobado
+    const primerNombre = (user.nombre || 'Socio').trim().split(' ')[0];
+    document.getElementById('welcomeUser').textContent = `¡Hola, ${primerNombre}!`;
+
+    // Poblar datos de "Tu Ritual de Consumo"
+    document.getElementById('valVisitas').textContent = user.visitas !== undefined ? user.visitas : 0;
+    document.getElementById('valBebida').textContent = user.bebida || 'Ninguna';
+    document.getElementById('valAlimento').textContent = user.alimento || 'Ninguna';
+    document.getElementById('valNotas').textContent = user.alergias || 'Ninguna';
 
     if (user.alergias) {
         document.getElementById('editAlergias').value = user.alergias;
     }
 
-    const qr = new QRious({
+    new QRious({
         element: document.getElementById('qrCanvas'),
         value: user.qrCode || `OCA-${user.email}`,
-        size: 200,
+        size: 210,
         background: '#ffffff',
         foreground: '#1c1a17'
     });
