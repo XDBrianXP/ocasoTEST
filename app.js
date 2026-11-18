@@ -21,10 +21,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCancelEditNotas = document.getElementById('btnCancelEditNotas');
     const btnUpdatePrefs = document.getElementById('btnUpdatePrefs');
 
-    // Verificar sesión activa previa
+    // Verificar sesión activa previa y sincronizar en segundo plano con Google Sheets
     const savedUser = localStorage.getItem('ocaso_user');
     if (savedUser) {
-        mostrarDashboard(JSON.parse(savedUser));
+        const parsedUser = JSON.parse(savedUser);
+        mostrarDashboard(parsedUser);
+        if (parsedUser.email) {
+            sincronizarDatosCliente(parsedUser.email);
+        }
     }
 
     showLogin.addEventListener('click', (e) => {
@@ -113,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     nombre: result.nombre,
                     email: emailInput,
                     qrCode: result.qrCode,
-                    visitas: result.visitas !== undefined ? result.visitas : 0,
+                    visitas: result.visitas !== undefined && result.visitas !== "" ? result.visitas : 0,
                     bebida: result.bebida || "Ninguna",
                     alimento: result.alimento || "Ninguna",
                     alergias: result.alergias || "Ninguna"
@@ -194,9 +198,45 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.classList.add('active');
             const target = document.getElementById(btn.getAttribute('data-target'));
             if (target) target.classList.add('active');
+
+            // Refrescar datos cada vez que cambie de pestaña
+            const currentUser = JSON.parse(localStorage.getItem('ocaso_user') || '{}');
+            if (currentUser.email) {
+                sincronizarDatosCliente(currentUser.email);
+            }
         });
     });
 });
+
+// SINCRONIZACIÓN AUTOMÁTICA EN SEGUNDO PLANO CON GOOGLE SHEETS
+async function sincronizarDatosCliente(email) {
+    try {
+        const response = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8'
+            },
+            body: JSON.stringify({ action: "login", correo: email.trim().toLowerCase() })
+        });
+        const result = await response.json();
+
+        if (result.status === "success") {
+            const clienteActualizado = {
+                nombre: result.nombre,
+                email: email.trim().toLowerCase(),
+                qrCode: result.qrCode,
+                visitas: result.visitas !== undefined && result.visitas !== "" ? result.visitas : 0,
+                bebida: result.bebida || "Ninguna",
+                alimento: result.alimento || "Ninguna",
+                alergias: result.alergias || "Ninguna"
+            };
+            localStorage.setItem('ocaso_user', JSON.stringify(clienteActualizado));
+            mostrarDashboard(clienteActualizado);
+        }
+    } catch (error) {
+        console.warn("No se pudo sincronizar en segundo plano:", error);
+    }
+}
 
 // REGISTRO NUEVO DIRECTO A GOOGLE SHEETS
 async function ejecutarRegistroCliente() {
@@ -259,12 +299,10 @@ function mostrarDashboard(user) {
     document.getElementById('login-view').style.display = 'none';
     document.getElementById('dashboard-view').style.display = 'block';
     
-    // Extrae solo el primer nombre para mostrar "¡Hola, Mauricio!" como en el diseño aprobado
     const primerNombre = (user.nombre || 'Socio').trim().split(' ')[0];
     document.getElementById('welcomeUser').textContent = `¡Hola, ${primerNombre}!`;
 
-    // Poblar datos de "Tu Ritual de Consumo"
-    document.getElementById('valVisitas').textContent = user.visitas !== undefined ? user.visitas : 0;
+    document.getElementById('valVisitas').textContent = user.visitas !== undefined && user.visitas !== "" ? user.visitas : 0;
     document.getElementById('valBebida').textContent = user.bebida || 'Ninguna';
     document.getElementById('valAlimento').textContent = user.alimento || 'Ninguna';
     document.getElementById('valNotas').textContent = user.alergias || 'Ninguna';
