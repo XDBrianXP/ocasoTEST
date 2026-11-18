@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ejecutarRegistroCliente();
     });
 
-    // INICIAR SESIÓN CONTRA GOOGLE SHEETS (CON HEADERS)
+    // INICIAR SESIÓN CONTRA GOOGLE SHEETS
     btnLoginSubmit.addEventListener('click', async () => {
         const emailInput = document.getElementById('loginEmail').value.trim().toLowerCase();
         if (!emailInput) {
@@ -98,6 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const clienteData = {
                     nombre: result.nombre,
                     email: emailInput,
+                    qrCode: result.qrCode,
                     alergias: result.alergias || "Ninguna"
                 };
                 localStorage.setItem('ocaso_user', JSON.stringify(clienteData));
@@ -114,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // GUARDAR CAMBIOS DE PREFERENCIAS EN GOOGLE SHEETS (CON HEADERS)
+    // GUARDAR CAMBIOS DE PREFERENCIAS EN GOOGLE SHEETS
     btnUpdatePrefs.addEventListener('click', async () => {
         const nuevaAlergia = document.getElementById('editAlergias').value;
         let currentUser = JSON.parse(localStorage.getItem('ocaso_user') || '{}');
@@ -139,23 +140,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     alergias: nuevaAlergia 
                 })
             });
-            
-            try {
-                const textResult = await response.text();
-                JSON.parse(textResult);
-            } catch (parseError) {
-                // Ignora la redirección interna de Google Apps Script
+            const result = await response.json();
+
+            if (result.status === "success") {
+                currentUser.alergias = nuevaAlergia;
+                localStorage.setItem('ocaso_user', JSON.stringify(currentUser));
+                alert('¡Preferencias actualizadas y sincronizadas en Google Sheets!');
+            } else {
+                alert(result.message || 'No se pudo actualizar en la base de datos.');
             }
-
-            currentUser.alergias = nuevaAlergia;
-            localStorage.setItem('ocaso_user', JSON.stringify(currentUser));
-            alert('¡Preferencias actualizadas y sincronizadas en Google Sheets!');
-
         } catch (error) {
-            console.warn("Aviso de red (cambio aplicado en Google Sheets):", error);
-            currentUser.alergias = nuevaAlergia;
-            localStorage.setItem('ocaso_user', JSON.stringify(currentUser));
-            alert('¡Preferencias actualizadas y sincronizadas en Google Sheets!');
+            console.error(error);
+            alert('Error al conectar con la base de datos.');
         } finally {
             btnUpdatePrefs.textContent = "Guardar Cambios";
             btnUpdatePrefs.disabled = false;
@@ -183,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// REGISTRO NUEVO DIRECTO A GOOGLE SHEETS (CON HEADERS Y FECHA LOCAL)
+// REGISTRO NUEVO DIRECTO A GOOGLE SHEETS
 async function ejecutarRegistroCliente() {
     const nombre = document.getElementById('nombre').value.trim();
     const email = `${document.getElementById('emailUser').value.trim()}@${document.getElementById('emailDomain').value}`;
@@ -203,6 +199,7 @@ async function ejecutarRegistroCliente() {
 
     const btnOpenModal = document.getElementById('btnOpenModal');
     btnOpenModal.textContent = "Registrando...";
+    btnOpenModal.disabled = true;
     
     try {
         const response = await fetch(APPS_SCRIPT_URL, {
@@ -212,36 +209,26 @@ async function ejecutarRegistroCliente() {
             },
             body: JSON.stringify(clienteData)
         });
-        
-        let result = {};
-        try {
-            const textResult = await response.text();
-            result = JSON.parse(textResult);
-        } catch (parseError) {
-            result = { status: "success" };
-        }
+        const result = await response.json();
 
-        if (result.status === "success" || result.status === undefined) {
+        if (result.status === "success") {
             const clienteCreado = {
                 nombre: result.nombre || nombre,
                 email: email,
+                qrCode: result.qrCode,
                 alergias: result.alergias || alergias
             };
             localStorage.setItem('ocaso_user', JSON.stringify(clienteCreado));
             mostrarDashboard(clienteCreado);
         } else {
             alert(result.message || 'Error al registrar en Google Sheets.');
-            btnOpenModal.textContent = "Obtener mi Código";
         }
     } catch (error) {
-        console.warn("Aviso de red (redirección completada en Google Sheets):", error);
-        const clienteCreado = {
-            nombre: nombre,
-            email: email,
-            alergias: alergias
-        };
-        localStorage.setItem('ocaso_user', JSON.stringify(clienteCreado));
-        mostrarDashboard(clienteCreado);
+        console.error(error);
+        alert('Error de conexión al registrar.');
+    } finally {
+        btnOpenModal.textContent = "Obtener mi Código";
+        btnOpenModal.disabled = false;
     }
 }
 
@@ -258,7 +245,7 @@ function mostrarDashboard(user) {
 
     const qr = new QRious({
         element: document.getElementById('qrCanvas'),
-        value: `OCA-${user.email}`,
+        value: user.qrCode || `OCA-${user.email}`,
         size: 200,
         background: '#ffffff',
         foreground: '#1c1a17'
