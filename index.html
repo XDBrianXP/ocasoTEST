@@ -154,14 +154,30 @@
                     </div>
                 </div>
 
-                <!-- PESTAÑA 2: TICKETS VIRTUALES -->
+                <!-- PESTAÑA 2: TICKETS VIRTUALES CON FILTRO DE FECHAS Y ENVÍO PDF -->
                 <div id="tab-tickets" class="tab-content">
-                    <div class="tickets-container" id="ticketsList">
-                        <div class="empty-ticket-state">
-                            <p>☕ Aún no tienes tickets registrados en tu cuenta.</p>
-                            <p class="empty-ticket-sub">Tus consumos en cafetería aparecerán aquí automáticamente.</p>
+                    <div class="ticket-filters-box">
+                        <div class="filter-header-row">
+                            <span class="filter-title">Filtrar por fecha</span>
+                            <a href="#" id="btnVerTodosTickets" class="filter-reset-link">Ver todos</a>
+                        </div>
+                        <div class="filter-dates-row">
+                            <div class="date-input-group">
+                                <label>Desde</label>
+                                <input type="date" id="filterFechaInicio">
+                            </div>
+                            <div class="date-input-group">
+                                <label>Hasta</label>
+                                <input type="date" id="filterFechaFin">
+                            </div>
                         </div>
                     </div>
+
+                    <div class="tickets-container" id="ticketsList"></div>
+
+                    <button type="button" id="btnSendEmailPDF" class="submit-btn btn-email-pdf" style="display: none;">
+                        📩 Enviar ticket(s) al correo en PDF
+                    </button>
                 </div>
 
                 <div class="footer-link" style="margin-top: 22px;">

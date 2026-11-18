@@ -1,6 +1,8 @@
 // URL OFICIAL Y EXACTA DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLgQItcfeq9SW1j70jPBy_LCdEmmsAptXRmVoH8rmCVJiEf8LCGZ2--SyknXr9ayFAvA/exec";
 
+let filtroFechaInicializado = false;
+
 document.addEventListener('DOMContentLoaded', () => {
     const btnOpenModal = document.getElementById('btnOpenModal');
     const privacyModal = document.getElementById('privacyModal');
@@ -21,7 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCancelEditNotas = document.getElementById('btnCancelEditNotas');
     const btnUpdatePrefs = document.getElementById('btnUpdatePrefs');
 
-    // Verificar sesión activa previa y sincronizar en segundo plano con Google Sheets
+    const filterFechaInicio = document.getElementById('filterFechaInicio');
+    const filterFechaFin = document.getElementById('filterFechaFin');
+    const btnVerTodosTickets = document.getElementById('btnVerTodosTickets');
+    const btnSendEmailPDF = document.getElementById('btnSendEmailPDF');
+
+    // Verificar sesión activa previa y sincronizar con Google Sheets
     const savedUser = localStorage.getItem('ocaso_user');
     if (savedUser) {
         const parsedUser = JSON.parse(savedUser);
@@ -81,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ejecutarRegistroCliente();
     });
 
-    // ABRIR Y CERRAR EDICIÓN DE NOTAS EN "TU RITUAL DE CONSUMO"
+    // ABRIR Y CERRAR EDICIÓN DE NOTAS
     btnToggleEditNotas.addEventListener('click', (e) => {
         e.preventDefault();
         editNotasContainer.style.display = editNotasContainer.style.display === 'none' ? 'block' : 'none';
@@ -89,6 +96,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnCancelEditNotas.addEventListener('click', () => {
         editNotasContainer.style.display = 'none';
+    });
+
+    // EVENTOS DE FILTRADO DE FECHAS PARA TICKETS
+    filterFechaInicio.addEventListener('change', () => {
+        const currentUser = JSON.parse(localStorage.getItem('ocaso_user') || '{}');
+        renderizarTickets(currentUser.tickets || []);
+    });
+
+    filterFechaFin.addEventListener('change', () => {
+        const currentUser = JSON.parse(localStorage.getItem('ocaso_user') || '{}');
+        renderizarTickets(currentUser.tickets || []);
+    });
+
+    btnVerTodosTickets.addEventListener('click', (e) => {
+        e.preventDefault();
+        filterFechaInicio.value = '';
+        filterFechaFin.value = '';
+        const currentUser = JSON.parse(localStorage.getItem('ocaso_user') || '{}');
+        renderizarTickets(currentUser.tickets || []);
+    });
+
+    // ENVIAR LOTE O TICKET FILTRADO EN PDF AL CORREO
+    btnSendEmailPDF.addEventListener('click', async () => {
+        const currentUser = JSON.parse(localStorage.getItem('ocaso_user') || '{}');
+        if (!currentUser.email) return;
+
+        const fechaInicio = filterFechaInicio.value;
+        const fechaFin = filterFechaFin.value;
+
+        btnSendEmailPDF.textContent = "Generando y enviando PDF...";
+        btnSendEmailPDF.disabled = true;
+
+        try {
+            const response = await fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8'
+                },
+                body: JSON.stringify({
+                    action: "sendTicketsPDF",
+                    correo: currentUser.email,
+                    fechaInicio: fechaInicio,
+                    fechaFin: fechaFin
+                })
+            });
+            const result = await response.json();
+
+            if (result.status === "success") {
+                alert('¡Listo! ' + result.message);
+            } else {
+                alert(result.message || 'No se pudo enviar el PDF.');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error de conexión al enviar el correo.');
+        } finally {
+            btnSendEmailPDF.textContent = "📩 Enviar ticket(s) al correo en PDF";
+            btnSendEmailPDF.disabled = false;
+        }
     });
 
     // INICIAR SESIÓN CONTRA GOOGLE SHEETS
@@ -113,6 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
 
             if (result.status === "success") {
+                filtroFechaInicializado = false;
                 const clienteData = {
                     nombre: result.nombre,
                     email: emailInput,
@@ -120,7 +187,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     visitas: result.visitas !== undefined && result.visitas !== "" ? result.visitas : 0,
                     bebida: result.bebida || "Ninguna",
                     alimento: result.alimento || "Ninguna",
-                    alergias: result.alergias || "Ninguna"
+                    alergias: result.alergias || "Ninguna",
+                    tickets: result.tickets || []
                 };
                 localStorage.setItem('ocaso_user', JSON.stringify(clienteData));
                 mostrarDashboard(clienteData);
@@ -184,6 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnLogout.addEventListener('click', (e) => {
         e.preventDefault();
         localStorage.removeItem('ocaso_user');
+        filtroFechaInicializado = false;
         dashboardView.style.display = 'none';
         registrationForm.style.display = 'block';
         document.getElementById('clientForm').reset();
@@ -199,7 +268,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const target = document.getElementById(btn.getAttribute('data-target'));
             if (target) target.classList.add('active');
 
-            // Refrescar datos cada vez que cambie de pestaña
             const currentUser = JSON.parse(localStorage.getItem('ocaso_user') || '{}');
             if (currentUser.email) {
                 sincronizarDatosCliente(currentUser.email);
@@ -228,7 +296,8 @@ async function sincronizarDatosCliente(email) {
                 visitas: result.visitas !== undefined && result.visitas !== "" ? result.visitas : 0,
                 bebida: result.bebida || "Ninguna",
                 alimento: result.alimento || "Ninguna",
-                alergias: result.alergias || "Ninguna"
+                alergias: result.alergias || "Ninguna",
+                tickets: result.tickets || []
             };
             localStorage.setItem('ocaso_user', JSON.stringify(clienteActualizado));
             mostrarDashboard(clienteActualizado);
@@ -271,6 +340,7 @@ async function ejecutarRegistroCliente() {
         const result = await response.json();
 
         if (result.status === "success") {
+            filtroFechaInicializado = false;
             const clienteCreado = {
                 nombre: result.nombre || nombre,
                 email: email,
@@ -278,7 +348,8 @@ async function ejecutarRegistroCliente() {
                 visitas: 0,
                 bebida: "Ninguna",
                 alimento: "Ninguna",
-                alergias: result.alergias || alergias
+                alergias: result.alergias || alergias,
+                tickets: []
             };
             localStorage.setItem('ocaso_user', JSON.stringify(clienteCreado));
             mostrarDashboard(clienteCreado);
@@ -318,4 +389,81 @@ function mostrarDashboard(user) {
         background: '#ffffff',
         foreground: '#1c1a17'
     });
+
+    const listaTickets = user.tickets || [];
+    const filterFechaInicio = document.getElementById('filterFechaInicio');
+    const filterFechaFin = document.getElementById('filterFechaFin');
+
+    // Por defecto selecciona el último día registrado en el historial del cliente
+    if (!filtroFechaInicializado && listaTickets.length > 0) {
+        const ultimaFechaISO = listaTickets[0].fechaISO;
+        filterFechaInicio.value = ultimaFechaISO;
+        filterFechaFin.value = ultimaFechaISO;
+        filtroFechaInicializado = true;
+    }
+
+    renderizarTickets(listaTickets);
+}
+
+function renderizarTickets(tickets) {
+    const ticketsList = document.getElementById('ticketsList');
+    const btnSendEmailPDF = document.getElementById('btnSendEmailPDF');
+    const fechaInicio = document.getElementById('filterFechaInicio').value;
+    const fechaFin = document.getElementById('filterFechaFin').value;
+
+    if (!tickets || tickets.length === 0) {
+        ticketsList.innerHTML = `
+            <div class="empty-ticket-state">
+                <p>☕ Aún no tienes tickets registrados en tu cuenta.</p>
+                <p class="empty-ticket-sub">Tus consumos en cafetería aparecerán aquí automáticamente.</p>
+            </div>
+        `;
+        btnSendEmailPDF.style.display = 'none';
+        return;
+    }
+
+    const filtrados = tickets.filter(t => {
+        if (fechaInicio && t.fechaISO < fechaInicio) return false;
+        if (fechaFin && t.fechaISO > fechaFin) return false;
+        return true;
+    });
+
+    if (filtrados.length === 0) {
+        ticketsList.innerHTML = `
+            <div class="empty-ticket-state">
+                <p>📅 No hay tickets en la fecha seleccionada.</p>
+                <p class="empty-ticket-sub">Cambia el rango de fechas o pulsa "Ver todos".</p>
+            </div>
+        `;
+        btnSendEmailPDF.style.display = 'none';
+        return;
+    }
+
+    btnSendEmailPDF.style.display = 'block';
+    ticketsList.innerHTML = filtrados.map(t => {
+        const productosHTML = (t.items && t.items.length > 0)
+            ? t.items.map(item => `
+                <div class="ticket-product-row">
+                    <span>${item.cantidad}x ${item.nombre}</span>
+                    <span class="ticket-product-Sub">$${Number(item.subtotal).toFixed(2)} MXN</span>
+                </div>
+            `).join('')
+            : `<div class="ticket-product-row"><span>Consumo en barra</span><span>$${Number(t.total).toFixed(2)} MXN</span></div>`;
+
+        return `
+            <div class="ticket-item-card">
+                <div class="ticket-item-header">
+                    <span class="ticket-id-badge">Ticket #${t.idTicket}</span>
+                    <span class="ticket-date-label">${t.fechaDisplay}</span>
+                </div>
+                <div class="ticket-item-body">
+                    ${productosHTML}
+                </div>
+                <div class="ticket-item-footer">
+                    <span class="ticket-barista">Atendió: ${t.barista}</span>
+                    <span class="ticket-total">Total: $${Number(t.total).toFixed(2)} MXN</span>
+                </div>
+            </div>
+        `;
+    }).join('');
 }

@@ -336,11 +336,131 @@ body {
 }
 
 /* ==========================================
-   TICKETS VIRTUALES
+   PESTAÑA: TICKETS VIRTUALES Y FILTROS
    ========================================== */
+.ticket-filters-box {
+    background-color: var(--crema-ritual);
+    border: 1px solid var(--borde-ritual);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+}
+
+.filter-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.filter-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--carbon-profundo);
+}
+
+.filter-reset-link {
+    font-size: 12.5px;
+    color: var(--ambar-interfaz);
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+.filter-dates-row {
+    display: flex;
+    gap: 10px;
+}
+
+.date-input-group {
+    flex: 1;
+}
+
+.date-input-group label {
+    display: block;
+    font-size: 11.5px;
+    color: #6c6860;
+    margin-bottom: 3px;
+}
+
+.date-input-group input {
+    width: 100%;
+    padding: 7px 8px;
+    border: 1px solid #d8d0c5;
+    border-radius: 8px;
+    background-color: #fff;
+    font-size: 12.5px;
+    color: var(--carbon-profundo);
+}
+
+.ticket-item-card {
+    background-color: var(--crema-ritual);
+    border: 1px solid var(--borde-ritual);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+}
+
+.ticket-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed #d8d0c5;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+}
+
+.ticket-id-badge {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--carbon-profundo);
+}
+
+.ticket-date-label {
+    font-size: 12px;
+    color: #6c6860;
+}
+
+.ticket-product-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13.5px;
+    margin-bottom: 6px;
+    color: var(--carbon-profundo);
+}
+
+.ticket-product-Sub {
+    font-weight: 600;
+}
+
+.ticket-item-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--borde-ritual);
+    padding-top: 8px;
+    margin-top: 8px;
+}
+
+.ticket-barista {
+    font-size: 11.5px;
+    color: #777;
+}
+
+.ticket-total {
+    font-size: 14.5px;
+    font-weight: 800;
+    color: var(--nogal-tostado);
+}
+
+.btn-email-pdf {
+    margin-top: 6px;
+    font-size: 14.5px;
+    padding: 13px;
+}
+
 .empty-ticket-state {
     text-align: center;
-    padding: 35px 15px;
+    padding: 30px 15px;
     color: #666;
     background-color: var(--crema-ritual);
     border: 1px solid var(--borde-ritual);
