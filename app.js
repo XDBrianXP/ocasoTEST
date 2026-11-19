@@ -394,7 +394,6 @@ function mostrarDashboard(user) {
     const filterFechaInicio = document.getElementById('filterFechaInicio');
     const filterFechaFin = document.getElementById('filterFechaFin');
 
-    // Por defecto selecciona el último día registrado en el historial del cliente
     if (!filtroFechaInicializado && listaTickets.length > 0) {
         const ultimaFechaISO = listaTickets[0].fechaISO;
         filterFechaInicio.value = ultimaFechaISO;
@@ -450,6 +449,8 @@ function renderizarTickets(tickets) {
             `).join('')
             : `<div class="ticket-product-row"><span>Consumo en barra</span><span>$${Number(t.total).toFixed(2)} MXN</span></div>`;
 
+        const pagoTexto = t.metodoPago ? `Método de pago: ${t.metodoPago}` : '';
+
         return `
             <div class="ticket-item-card">
                 <div class="ticket-item-header">
@@ -459,6 +460,7 @@ function renderizarTickets(tickets) {
                 <div class="ticket-item-body">
                     ${productosHTML}
                 </div>
+                ${pagoTexto ? `<div class="ticket-payment-line">${pagoTexto}</div>` : ''}
                 <div class="ticket-item-footer">
                     <span class="ticket-barista">Atendió: ${t.barista}</span>
                     <span class="ticket-total">Total: $${Number(t.total).toFixed(2)} MXN</span>
