@@ -173,6 +173,15 @@
                         </div>
                     </div>
 
+                    <!-- BARRA DE SELECCIÓN MÚLTIPLE (VISIBLE SOLO CUANDO HAY > 1 TICKET) -->
+                    <div id="ticketSelectionBar" class="ticket-selection-bar" style="display: none;">
+                        <label class="select-all-label">
+                            <input type="checkbox" id="chkSelectAllTickets">
+                            <span id="txtSelectAllLabel">Seleccionar todos</span>
+                        </label>
+                        <span id="txtSelectedCount" class="selected-count-badge">0 seleccionados</span>
+                    </div>
+
                     <div class="tickets-container" id="ticketsList"></div>
 
                     <button type="button" id="btnSendEmailPDF" class="submit-btn btn-email-pdf" style="display: none;">

@@ -2,6 +2,8 @@
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLgQItcfeq9SW1j70jPBy_LCdEmmsAptXRmVoH8rmCVJiEf8LCGZ2--SyknXr9ayFAvA/exec";
 
 let filtroFechaInicializado = false;
+let ticketsSeleccionados = new Set();
+let ultimoFiltroKey = "";
 
 document.addEventListener('DOMContentLoaded', () => {
     const btnOpenModal = document.getElementById('btnOpenModal');
@@ -26,6 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const filterFechaInicio = document.getElementById('filterFechaInicio');
     const filterFechaFin = document.getElementById('filterFechaFin');
     const btnVerTodosTickets = document.getElementById('btnVerTodosTickets');
+    const chkSelectAllTickets = document.getElementById('chkSelectAllTickets');
+    const ticketsList = document.getElementById('ticketsList');
     const btnSendEmailPDF = document.getElementById('btnSendEmailPDF');
 
     // Verificar sesión activa previa y sincronizar con Google Sheets
@@ -117,13 +121,57 @@ document.addEventListener('DOMContentLoaded', () => {
         renderizarTickets(currentUser.tickets || []);
     });
 
-    // ENVIAR LOTE O TICKET FILTRADO EN PDF AL CORREO
+    // SELECCIONAR / DESELECCIONAR TODOS LOS TICKETS FILTRADOS
+    chkSelectAllTickets.addEventListener('change', (e) => {
+        const currentUser = JSON.parse(localStorage.getItem('ocaso_user') || '{}');
+        const filtrados = obtenerTicketsFiltrados(currentUser.tickets || []);
+
+        if (e.target.checked) {
+            filtrados.forEach(t => ticketsSeleccionados.add(String(t.idTicket)));
+        } else {
+            filtrados.forEach(t => ticketsSeleccionados.delete(String(t.idTicket)));
+        }
+
+        renderizarTickets(currentUser.tickets || []);
+    });
+
+    // CHECKBOX INDIVIDUAL POR TICKET
+    ticketsList.addEventListener('change', (e) => {
+        if (e.target.classList.contains('ticket-item-checkbox')) {
+            const idTicket = String(e.target.getAttribute('data-ticket-id'));
+            if (e.target.checked) {
+                ticketsSeleccionados.add(idTicket);
+            } else {
+                ticketsSeleccionados.delete(idTicket);
+            }
+
+            const currentUser = JSON.parse(localStorage.getItem('ocaso_user') || '{}');
+            renderizarTickets(currentUser.tickets || []);
+        }
+    });
+
+    // ENVIAR LOTE O TICKET(S) SELECCIONADOS EN PDF AL CORREO
     btnSendEmailPDF.addEventListener('click', async () => {
         const currentUser = JSON.parse(localStorage.getItem('ocaso_user') || '{}');
         if (!currentUser.email) return;
 
         const fechaInicio = filterFechaInicio.value;
         const fechaFin = filterFechaFin.value;
+        const filtrados = obtenerTicketsFiltrados(currentUser.tickets || []);
+
+        let idsAEnviar = [];
+        if (filtrados.length === 1) {
+            idsAEnviar = [String(filtrados[0].idTicket)];
+        } else {
+            idsAEnviar = filtrados
+                .map(t => String(t.idTicket))
+                .filter(id => ticketsSeleccionados.has(id));
+
+            if (idsAEnviar.length === 0) {
+                alert('Selecciona al menos un ticket para enviar por correo.');
+                return;
+            }
+        }
 
         btnSendEmailPDF.textContent = "Generando y enviando PDF...";
         btnSendEmailPDF.disabled = true;
@@ -138,7 +186,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     action: "sendTicketsPDF",
                     correo: currentUser.email,
                     fechaInicio: fechaInicio,
-                    fechaFin: fechaFin
+                    fechaFin: fechaFin,
+                    ticketIds: idsAEnviar
                 })
             });
             const result = await response.json();
@@ -180,6 +229,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (result.status === "success") {
                 filtroFechaInicializado = false;
+                ultimoFiltroKey = "";
+                ticketsSeleccionados.clear();
                 const clienteData = {
                     nombre: result.nombre,
                     email: emailInput,
@@ -253,6 +304,8 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         localStorage.removeItem('ocaso_user');
         filtroFechaInicializado = false;
+        ultimoFiltroKey = "";
+        ticketsSeleccionados.clear();
         dashboardView.style.display = 'none';
         registrationForm.style.display = 'block';
         document.getElementById('clientForm').reset();
@@ -341,6 +394,8 @@ async function ejecutarRegistroCliente() {
 
         if (result.status === "success") {
             filtroFechaInicializado = false;
+            ultimoFiltroKey = "";
+            ticketsSeleccionados.clear();
             const clienteCreado = {
                 nombre: result.nombre || nombre,
                 email: email,
@@ -363,6 +418,17 @@ async function ejecutarRegistroCliente() {
         btnOpenModal.textContent = "Obtener mi Código";
         btnOpenModal.disabled = false;
     }
+}
+
+function obtenerTicketsFiltrados(tickets) {
+    const fechaInicio = document.getElementById('filterFechaInicio').value;
+    const fechaFin = document.getElementById('filterFechaFin').value;
+
+    return (tickets || []).filter(t => {
+        if (fechaInicio && t.fechaISO < fechaInicio) return false;
+        if (fechaFin && t.fechaISO > fechaFin) return false;
+        return true;
+    });
 }
 
 function mostrarDashboard(user) {
@@ -407,10 +473,16 @@ function mostrarDashboard(user) {
 function renderizarTickets(tickets) {
     const ticketsList = document.getElementById('ticketsList');
     const btnSendEmailPDF = document.getElementById('btnSendEmailPDF');
+    const selectionBar = document.getElementById('ticketSelectionBar');
+    const chkSelectAll = document.getElementById('chkSelectAllTickets');
+    const txtSelectAllLabel = document.getElementById('txtSelectAllLabel');
+    const txtSelectedCount = document.getElementById('txtSelectedCount');
+
     const fechaInicio = document.getElementById('filterFechaInicio').value;
     const fechaFin = document.getElementById('filterFechaFin').value;
 
     if (!tickets || tickets.length === 0) {
+        selectionBar.style.display = 'none';
         ticketsList.innerHTML = `
             <div class="empty-ticket-state">
                 <p>☕ Aún no tienes tickets registrados en tu cuenta.</p>
@@ -421,13 +493,10 @@ function renderizarTickets(tickets) {
         return;
     }
 
-    const filtrados = tickets.filter(t => {
-        if (fechaInicio && t.fechaISO < fechaInicio) return false;
-        if (fechaFin && t.fechaISO > fechaFin) return false;
-        return true;
-    });
+    const filtrados = obtenerTicketsFiltrados(tickets);
 
     if (filtrados.length === 0) {
+        selectionBar.style.display = 'none';
         ticketsList.innerHTML = `
             <div class="empty-ticket-state">
                 <p>📅 No hay tickets en la fecha seleccionada.</p>
@@ -438,8 +507,31 @@ function renderizarTickets(tickets) {
         return;
     }
 
+    const filtroKey = `${fechaInicio}|${fechaFin}|${filtrados.map(t => t.idTicket).join(',')}`;
+    if (filtroKey !== ultimoFiltroKey) {
+        ultimoFiltroKey = filtroKey;
+        ticketsSeleccionados.clear();
+        filtrados.forEach(t => ticketsSeleccionados.add(String(t.idTicket)));
+    }
+
+    const mostrarOpcionesMultiples = filtrados.length > 1;
+    selectionBar.style.display = mostrarOpcionesMultiples ? 'flex' : 'none';
+
+    if (mostrarOpcionesMultiples) {
+        const idsFiltrados = filtrados.map(t => String(t.idTicket));
+        const marcadasEnFiltro = idsFiltrados.filter(id => ticketsSeleccionados.has(id));
+        const todosMarcados = marcadasEnFiltro.length === idsFiltrados.length;
+
+        chkSelectAll.checked = todosMarcados;
+        txtSelectAllLabel.textContent = todosMarcados ? "Deseleccionar todos" : "Seleccionar todos";
+        txtSelectedCount.textContent = `${marcadasEnFiltro.length} de ${idsFiltrados.length} seleccionados`;
+    }
+
     btnSendEmailPDF.style.display = 'block';
     ticketsList.innerHTML = filtrados.map(t => {
+        const idStr = String(t.idTicket);
+        const isChecked = mostrarOpcionesMultiples ? ticketsSeleccionados.has(idStr) : true;
+
         const productosHTML = (t.items && t.items.length > 0)
             ? t.items.map(item => `
                 <div class="ticket-product-row">
@@ -450,11 +542,17 @@ function renderizarTickets(tickets) {
             : `<div class="ticket-product-row"><span>Consumo en barra</span><span>$${Number(t.total).toFixed(2)} MXN</span></div>`;
 
         const pagoTexto = t.metodoPago ? `Método de pago: ${t.metodoPago}` : '';
+        const checkboxHTML = mostrarOpcionesMultiples
+            ? `<input type="checkbox" class="ticket-item-checkbox" data-ticket-id="${idStr}" ${isChecked ? 'checked' : ''}>`
+            : '';
 
         return `
-            <div class="ticket-item-card">
+            <div class="ticket-item-card ${isChecked ? 'is-selected' : ''}">
                 <div class="ticket-item-header">
-                    <span class="ticket-id-badge">Ticket #${t.idTicket}</span>
+                    <div class="ticket-header-left">
+                        ${checkboxHTML}
+                        <span class="ticket-id-badge">Ticket #${t.idTicket}</span>
+                    </div>
                     <span class="ticket-date-label">${t.fechaDisplay}</span>
                 </div>
                 <div class="ticket-item-body">
