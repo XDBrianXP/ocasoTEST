@@ -1,5 +1,10 @@
-// URL OFICIAL Y EXACTA DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT
+// URL OFICIAL Y EXACTA DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT (ocasocoffeeclub@gmail.com)
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzrvgCV5POAUIP7oHG51bAkbiKTEen0wj1jVv-JXcEGjfZ86u0rSkPvx79xLXd2LnSv7g/exec";
+
+// INTERRUPTOR DE FUNCIÓN (Feature Flag):
+// false = oculto en registro y perfil (envía "Ninguna" por defecto a Sheets)
+// true  = visible y editable en registro y en "Tu Ritual de Consumo"
+const HABILITAR_PREFERENCIAS_CONSUMO = false;
 
 let filtroFechaInicializado = false;
 let ticketsSeleccionados = new Set();
@@ -20,6 +25,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnLoginSubmit = document.getElementById('btnLoginSubmit');
     const btnLogout = document.getElementById('btnLogout');
     
+    const grupoPreferenciasRegistro = document.getElementById('grupoPreferenciasRegistro');
+    const bloqueNotasBarista = document.getElementById('bloqueNotasBarista');
+    const selectPreferenciasRegistro = document.getElementById('alergias');
+
     const btnToggleEditNotas = document.getElementById('btnToggleEditNotas');
     const editNotasContainer = document.getElementById('editNotasContainer');
     const btnCancelEditNotas = document.getElementById('btnCancelEditNotas');
@@ -31,6 +40,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const chkSelectAllTickets = document.getElementById('chkSelectAllTickets');
     const ticketsList = document.getElementById('ticketsList');
     const btnSendEmailPDF = document.getElementById('btnSendEmailPDF');
+
+    // Aplicar estado del interruptor de preferencias al iniciar
+    if (grupoPreferenciasRegistro) {
+        grupoPreferenciasRegistro.style.display = HABILITAR_PREFERENCIAS_CONSUMO ? 'block' : 'none';
+    }
+    if (bloqueNotasBarista) {
+        bloqueNotasBarista.style.display = HABILITAR_PREFERENCIAS_CONSUMO ? 'block' : 'none';
+    }
+    if (selectPreferenciasRegistro) {
+        selectPreferenciasRegistro.required = HABILITAR_PREFERENCIAS_CONSUMO;
+        if (!HABILITAR_PREFERENCIAS_CONSUMO) {
+            selectPreferenciasRegistro.value = 'Ninguna';
+        }
+    }
 
     // Verificar sesión activa previa y sincronizar con Google Sheets
     const savedUser = localStorage.getItem('ocaso_user');
@@ -60,9 +83,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const emailDomain = document.getElementById('emailDomain').value;
         const confirmEmailUser = document.getElementById('confirmEmailUser').value.trim();
         const confirmEmailDomain = document.getElementById('confirmEmailDomain').value;
-        const alergias = document.getElementById('alergias').value;
+        const alergias = HABILITAR_PREFERENCIAS_CONSUMO
+            ? document.getElementById('alergias').value
+            : 'Ninguna';
 
-        if (!nombre || !emailUser || !emailDomain || !confirmEmailUser || !confirmEmailDomain || !alergias) {
+        if (!nombre || !emailUser || !emailDomain || !confirmEmailUser || !confirmEmailDomain || (HABILITAR_PREFERENCIAS_CONSUMO && !alergias)) {
             alert('Por favor completa todos los campos obligatorios (*).');
             return;
         }
@@ -92,15 +117,19 @@ document.addEventListener('DOMContentLoaded', () => {
         ejecutarRegistroCliente();
     });
 
-    // ABRIR Y CERRAR EDICIÓN DE NOTAS
-    btnToggleEditNotas.addEventListener('click', (e) => {
-        e.preventDefault();
-        editNotasContainer.style.display = editNotasContainer.style.display === 'none' ? 'block' : 'none';
-    });
+    // ABRIR Y CERRAR EDICIÓN DE NOTAS (activo solo cuando el interruptor está en true)
+    if (btnToggleEditNotas) {
+        btnToggleEditNotas.addEventListener('click', (e) => {
+            e.preventDefault();
+            editNotasContainer.style.display = editNotasContainer.style.display === 'none' ? 'block' : 'none';
+        });
+    }
 
-    btnCancelEditNotas.addEventListener('click', () => {
-        editNotasContainer.style.display = 'none';
-    });
+    if (btnCancelEditNotas) {
+        btnCancelEditNotas.addEventListener('click', () => {
+            editNotasContainer.style.display = 'none';
+        });
+    }
 
     // EVENTOS DE FILTRADO DE FECHAS PARA TICKETS
     filterFechaInicio.addEventListener('change', () => {
@@ -256,49 +285,51 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // GUARDAR CAMBIOS DE NOTAS EN GOOGLE SHEETS
-    btnUpdatePrefs.addEventListener('click', async () => {
-        const nuevaAlergia = document.getElementById('editAlergias').value;
-        let currentUser = JSON.parse(localStorage.getItem('ocaso_user') || '{}');
-        
-        if (!currentUser.email) {
-            alert('Sesión no válida.');
-            return;
-        }
-
-        btnUpdatePrefs.textContent = "Guardando...";
-        btnUpdatePrefs.disabled = true;
-
-        try {
-            const response = await fetch(APPS_SCRIPT_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'text/plain;charset=utf-8'
-                },
-                body: JSON.stringify({ 
-                    action: "update", 
-                    correo: currentUser.email, 
-                    alergias: nuevaAlergia 
-                })
-            });
-            const result = await response.json();
-
-            if (result.status === "success") {
-                currentUser.alergias = nuevaAlergia;
-                localStorage.setItem('ocaso_user', JSON.stringify(currentUser));
-                document.getElementById('valNotas').textContent = nuevaAlergia;
-                editNotasContainer.style.display = 'none';
-                alert('¡Nota para el barista actualizada!');
-            } else {
-                alert(result.message || 'No se pudo actualizar en la base de datos.');
+    if (btnUpdatePrefs) {
+        btnUpdatePrefs.addEventListener('click', async () => {
+            const nuevaAlergia = document.getElementById('editAlergias').value;
+            let currentUser = JSON.parse(localStorage.getItem('ocaso_user') || '{}');
+            
+            if (!currentUser.email) {
+                alert('Sesión no válida.');
+                return;
             }
-        } catch (error) {
-            console.error(error);
-            alert('Error al conectar con la base de datos.');
-        } finally {
-            btnUpdatePrefs.textContent = "Guardar";
-            btnUpdatePrefs.disabled = false;
-        }
-    });
+
+            btnUpdatePrefs.textContent = "Guardando...";
+            btnUpdatePrefs.disabled = true;
+
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8'
+                    },
+                    body: JSON.stringify({ 
+                        action: "update", 
+                        correo: currentUser.email, 
+                        alergias: nuevaAlergia 
+                    })
+                });
+                const result = await response.json();
+
+                if (result.status === "success") {
+                    currentUser.alergias = nuevaAlergia;
+                    localStorage.setItem('ocaso_user', JSON.stringify(currentUser));
+                    document.getElementById('valNotas').textContent = nuevaAlergia;
+                    editNotasContainer.style.display = 'none';
+                    alert('¡Nota para el barista actualizada!');
+                } else {
+                    alert(result.message || 'No se pudo actualizar en la base de datos.');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Error al conectar con la base de datos.');
+            } finally {
+                btnUpdatePrefs.textContent = "Guardar";
+                btnUpdatePrefs.disabled = false;
+            }
+        });
+    }
 
     btnLogout.addEventListener('click', (e) => {
         e.preventDefault();
@@ -309,6 +340,9 @@ document.addEventListener('DOMContentLoaded', () => {
         dashboardView.style.display = 'none';
         registrationForm.style.display = 'block';
         document.getElementById('clientForm').reset();
+        if (selectPreferenciasRegistro && !HABILITAR_PREFERENCIAS_CONSUMO) {
+            selectPreferenciasRegistro.value = 'Ninguna';
+        }
     });
 
     const tabBtns = document.querySelectorAll('.tab-btn');
@@ -364,7 +398,9 @@ async function sincronizarDatosCliente(email) {
 async function ejecutarRegistroCliente() {
     const nombre = document.getElementById('nombre').value.trim();
     const email = `${document.getElementById('emailUser').value.trim()}@${document.getElementById('emailDomain').value}`;
-    const alergias = document.getElementById('alergias').value;
+    const alergias = HABILITAR_PREFERENCIAS_CONSUMO
+        ? (document.getElementById('alergias').value || 'Ninguna')
+        : 'Ninguna';
     const telefono = document.getElementById('telefono').value.trim();
     const fechaAceptacion = new Date().toLocaleString("es-MX");
 
@@ -442,10 +478,16 @@ function mostrarDashboard(user) {
     document.getElementById('valVisitas').textContent = user.visitas !== undefined && user.visitas !== "" ? user.visitas : 0;
     document.getElementById('valBebida').textContent = user.bebida || 'Ninguna';
     document.getElementById('valAlimento').textContent = user.alimento || 'Ninguna';
-    document.getElementById('valNotas').textContent = user.alergias || 'Ninguna';
 
-    if (user.alergias) {
-        document.getElementById('editAlergias').value = user.alergias;
+    const valNotasEl = document.getElementById('valNotas');
+    if (valNotasEl) {
+        valNotasEl.textContent = user.alergias || 'Ninguna';
+    }
+
+    const editAlergiasEl = document.getElementById('editAlergias');
+    if (editAlergiasEl && user.alergias) {
+        const existeOpcion = Array.from(editAlergiasEl.options).some(opt => opt.value === user.alergias);
+        editAlergiasEl.value = existeOpcion ? user.alergias : 'Ninguna';
     }
 
     new QRious({

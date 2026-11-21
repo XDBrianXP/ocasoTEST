@@ -58,15 +58,23 @@
                             </select>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>Alergias o Preferencias *</label>
-                        <select id="alergias" required>
-                            <option value="">Selecciona tus preferencias</option>
+                    <!-- APARTADO OCULTO POR FEATURE FLAG (HABILITAR_PREFERENCIAS_CONSUMO en app.js) -->
+                    <div class="form-group" id="grupoPreferenciasRegistro" style="display: none;">
+                        <label>Preferencias de Consumo *</label>
+                        <select id="alergias">
+                            <option value="">Selecciona tu preferencia</option>
                             <option value="Ninguna">Ninguna</option>
-                            <option value="Intolerancia a la lactosa">Intolerancia a la lactosa</option>
-                            <option value="Alergia a la nuez / frutos secos">Alergia a la nuez / frutos secos</option>
+                            <option value="Leche deslactosada">Leche deslactosada</option>
+                            <option value="Leche de avena">Leche de avena</option>
+                            <option value="Leche de almendra">Leche de almendra</option>
+                            <option value="Leche de coco">Leche de coco</option>
                             <option value="Vegano">Vegano</option>
-                            <option value="Sin azúcar / Keto">Sin azúcar / Keto</option>
+                            <option value="Descafeinado">Descafeinado</option>
+                            <option value="Sin azúcar / Sin jarabes">Sin azúcar / Sin jarabes</option>
+                            <option value="Poco dulce">Poco dulce</option>
+                            <option value="Extra caliente">Extra caliente</option>
+                            <option value="Poco hielo / Sin hielo">Poco hielo / Sin hielo</option>
+                            <option value="Otra (le comentaré al barista)">Otra (le comentaré al barista)</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -125,30 +133,40 @@
                             <span class="ritual-label">Alimento favorito:</span>
                             <span class="ritual-value" id="valAlimento">Ninguna</span>
                         </div>
-                        
-                        <hr class="ritual-divider">
-                        
-                        <div class="ritual-row">
-                            <span class="ritual-label">Nota para el<br>barista:</span>
-                            <span class="ritual-value ritual-note" id="valNotas">Ninguna</span>
-                        </div>
-                        
-                        <div class="edit-notes-wrapper">
-                            <a href="#" id="btnToggleEditNotas" class="edit-notes-link">Editar notas</a>
-                        </div>
 
-                        <!-- DESPLEGABLE INTERNO PARA EDITAR NOTAS -->
-                        <div id="editNotasContainer" class="edit-notas-box" style="display: none;">
-                            <select id="editAlergias">
-                                <option value="Ninguna">Ninguna</option>
-                                <option value="Intolerancia a la lactosa">Intolerancia a la lactosa</option>
-                                <option value="Alergia a la nuez / frutos secos">Alergia a la nuez / frutos secos</option>
-                                <option value="Vegano">Vegano</option>
-                                <option value="Sin azúcar / Keto">Sin azúcar / Keto</option>
-                            </select>
-                            <div class="edit-notas-actions">
-                                <button type="button" id="btnCancelEditNotas" class="btn-cancel-notes">Cancelar</button>
-                                <button type="button" id="btnUpdatePrefs" class="btn-save-notes">Guardar</button>
+                        <!-- APARTADO OCULTO POR FEATURE FLAG (HABILITAR_PREFERENCIAS_CONSUMO en app.js) -->
+                        <div id="bloqueNotasBarista" style="display: none;">
+                            <hr class="ritual-divider">
+                            
+                            <div class="ritual-row">
+                                <span class="ritual-label">Nota para el<br>barista:</span>
+                                <span class="ritual-value ritual-note" id="valNotas">Ninguna</span>
+                            </div>
+                            
+                            <div class="edit-notes-wrapper">
+                                <a href="#" id="btnToggleEditNotas" class="edit-notes-link">Editar notas</a>
+                            </div>
+
+                            <!-- DESPLEGABLE INTERNO PARA EDITAR NOTAS -->
+                            <div id="editNotasContainer" class="edit-notas-box" style="display: none;">
+                                <select id="editAlergias">
+                                    <option value="Ninguna">Ninguna</option>
+                                    <option value="Leche deslactosada">Leche deslactosada</option>
+                                    <option value="Leche de avena">Leche de avena</option>
+                                    <option value="Leche de almendra">Leche de almendra</option>
+                                    <option value="Leche de coco">Leche de coco</option>
+                                    <option value="Vegano">Vegano</option>
+                                    <option value="Descafeinado">Descafeinado</option>
+                                    <option value="Sin azúcar / Sin jarabes">Sin azúcar / Sin jarabes</option>
+                                    <option value="Poco dulce">Poco dulce</option>
+                                    <option value="Extra caliente">Extra caliente</option>
+                                    <option value="Poco hielo / Sin hielo">Poco hielo / Sin hielo</option>
+                                    <option value="Otra (le comentaré al barista)">Otra (le comentaré al barista)</option>
+                                </select>
+                                <div class="edit-notas-actions">
+                                    <button type="button" id="btnCancelEditNotas" class="btn-cancel-notes">Cancelar</button>
+                                    <button type="button" id="btnUpdatePrefs" class="btn-save-notes">Guardar</button>
+                                </div>
                             </div>
                         </div>
                     </div>
