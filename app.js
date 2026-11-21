@@ -1,5 +1,5 @@
 // URL OFICIAL Y EXACTA DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLgQItcfeq9SW1j70jPBy_LCdEmmsAptXRmVoH8rmCVJiEf8LCGZ2--SyknXr9ayFAvA/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzrvgCV5POAUIP7oHG51bAkbiKTEen0wj1jVv-JXcEGjfZ86u0rSkPvx79xLXd2LnSv7g/exec";
 
 let filtroFechaInicializado = false;
 let ticketsSeleccionados = new Set();
