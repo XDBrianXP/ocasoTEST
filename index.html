@@ -21,6 +21,12 @@
 
         <!-- TARJETA BLANCA PRINCIPAL -->
         <div class="card">
+            <!-- NAVEGACIÓN PÚBLICA (VISIBLE SOLO SIN SESIÓN INICIADA) -->
+            <div id="public-nav" class="nav-tabs public-nav-tabs">
+                <button type="button" class="tab-btn public-tab-btn active" data-public-target="club">Club de Socios</button>
+                <button type="button" class="tab-btn public-tab-btn" data-public-target="menu">Menú</button>
+            </div>
+
             <!-- FORMULARIO DE REGISTRO -->
             <div id="registration-form">
                 <form id="clientForm">
@@ -100,16 +106,34 @@
                 </div>
             </div>
 
-            <!-- VISTA DASHBOARD APROBADA + PESTAÑA TICKETS VIRTUALES -->
+            <!-- VISTA PÚBLICA DEL MENÚ DIGITAL -->
+            <div id="public-menu-view" style="display: none;">
+                <div class="menu-intro">
+                    <p class="menu-hint">Toca cualquier carta para ampliar y hacer zoom</p>
+                </div>
+                <div class="menu-filter-pills" data-menu-scope="public">
+                    <button type="button" class="menu-pill active" data-filter="all">Todo</button>
+                    <button type="button" class="menu-pill" data-filter="precios">Precios</button>
+                    <button type="button" class="menu-pill" data-filter="fotos">Fotos</button>
+                </div>
+                <div id="publicMenuGallery" class="menu-gallery"></div>
+                <div class="menu-cta-box">
+                    <p>¿Quieres tu código de socio y tickets digitales?</p>
+                    <button type="button" id="btnMenuToRegister" class="btn-menu-cta">Unirme a OCASO Club</button>
+                </div>
+            </div>
+
+            <!-- VISTA DASHBOARD APROBADA + PESTAÑA MENÚ + PESTAÑA TICKETS VIRTUALES -->
             <div id="dashboard-view" style="display: none;">
                 <div class="user-greeting">
                     <h3 id="welcomeUser">¡Hola!</h3>
                 </div>
                 
-                <!-- PESTAÑAS: MI CÓDIGO QR Y TICKETS VIRTUALES -->
+                <!-- PESTAÑAS: MI QR | MENÚ | TICKETS -->
                 <div class="nav-tabs">
-                    <button class="tab-btn active" data-target="tab-qr">Mi Código QR</button>
-                    <button class="tab-btn" data-target="tab-tickets">Tickets Virtuales</button>
+                    <button type="button" class="tab-btn dashboard-tab-btn active" data-target="tab-qr">Mi QR</button>
+                    <button type="button" class="tab-btn dashboard-tab-btn" data-target="tab-menu">Menú</button>
+                    <button type="button" class="tab-btn dashboard-tab-btn" data-target="tab-tickets">Tickets</button>
                 </div>
 
                 <!-- PESTAÑA 1: QR + TU RITUAL DE CONSUMO -->
@@ -172,7 +196,20 @@
                     </div>
                 </div>
 
-                <!-- PESTAÑA 2: TICKETS VIRTUALES CON FILTRO DE FECHAS Y ENVÍO PDF -->
+                <!-- PESTAÑA 2: MENÚ DIGITAL -->
+                <div id="tab-menu" class="tab-content">
+                    <div class="menu-intro">
+                        <p class="menu-hint">Toca cualquier carta para ampliar y hacer zoom</p>
+                    </div>
+                    <div class="menu-filter-pills" data-menu-scope="dashboard">
+                        <button type="button" class="menu-pill active" data-filter="all">Todo</button>
+                        <button type="button" class="menu-pill" data-filter="precios">Precios</button>
+                        <button type="button" class="menu-pill" data-filter="fotos">Fotos</button>
+                    </div>
+                    <div id="dashboardMenuGallery" class="menu-gallery"></div>
+                </div>
+
+                <!-- PESTAÑA 3: TICKETS VIRTUALES CON FILTRO DE FECHAS Y ENVÍO PDF -->
                 <div id="tab-tickets" class="tab-content">
                     <div class="ticket-filters-box">
                         <div class="filter-header-row">
@@ -229,6 +266,25 @@
                 <button type="button" id="btnRejectPrivacy" class="btn-secondary">Rechazar</button>
                 <button type="button" id="btnAcceptPrivacy" class="submit-btn" disabled>Aceptar y Continuar</button>
             </div>
+        </div>
+    </div>
+
+    <!-- VISOR PANTALLA COMPLETA (LIGHTBOX) PARA IMÁGENES DEL MENÚ -->
+    <div id="menuLightbox" class="lightbox-overlay" style="display: none;" aria-hidden="true">
+        <div class="lightbox-topbar">
+            <div class="lightbox-title-wrap">
+                <span id="lightboxTitle" class="lightbox-title">Menú OCASO</span>
+                <span id="lightboxCounter" class="lightbox-counter">1 / 7</span>
+            </div>
+            <button type="button" id="btnCloseLightbox" class="lightbox-close-btn" aria-label="Cerrar">&times;</button>
+        </div>
+        <div id="lightboxStage" class="lightbox-stage">
+            <img id="lightboxImg" src="" alt="Carta OCASO Coffee Club">
+        </div>
+        <div class="lightbox-controls">
+            <button type="button" id="btnLightboxPrev" class="lightbox-ctrl-btn">‹ Anterior</button>
+            <button type="button" id="btnLightboxZoom" class="lightbox-ctrl-btn lightbox-zoom-btn">Ampliar</button>
+            <button type="button" id="btnLightboxNext" class="lightbox-ctrl-btn">Siguiente ›</button>
         </div>
     </div>
 

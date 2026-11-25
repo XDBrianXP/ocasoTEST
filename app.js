@@ -6,9 +6,25 @@ const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzrvgCV5POAUIP7
 // true  = visible y editable en registro y en "Tu Ritual de Consumo"
 const HABILITAR_PREFERENCIAS_CONSUMO = false;
 
+// CATÁLOGO VISUAL DEL MENÚ (carpeta /menu)
+const MENU_ITEMS = [
+    { src: "menu/01-bebidas-precios.jpeg", titulo: "Menú de Bebidas", etiqueta: "Precios", categoria: "precios" },
+    { src: "menu/02-alimentos-precios.jpeg", titulo: "Menú de Alimentos", etiqueta: "Precios", categoria: "precios" },
+    { src: "menu/03-coffee-classics.jpeg", titulo: "Coffee Classics", etiqueta: "Fotos", categoria: "fotos" },
+    { src: "menu/04-coffee-creations.jpeg", titulo: "Coffee Creations", etiqueta: "Fotos", categoria: "fotos" },
+    { src: "menu/05-beyond-coffee.jpeg", titulo: "Beyond Coffee", etiqueta: "Fotos", categoria: "fotos" },
+    { src: "menu/06-dirty-functional.jpeg", titulo: "Dirty & Functional", etiqueta: "Fotos", categoria: "fotos" },
+    { src: "menu/07-alimentos-fotos.jpeg", titulo: "Alimentos", etiqueta: "Fotos", categoria: "fotos" }
+];
+
 let filtroFechaInicializado = false;
 let ticketsSeleccionados = new Set();
 let ultimoFiltroKey = "";
+let vistaClubPublica = "register"; // "register" | "login"
+
+// Estado del Lightbox
+let lightboxListaActual = MENU_ITEMS;
+let lightboxIndiceActual = 0;
 
 document.addEventListener('DOMContentLoaded', () => {
     const btnOpenModal = document.getElementById('btnOpenModal');
@@ -17,6 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnAcceptPrivacy = document.getElementById('btnAcceptPrivacy');
     const btnRejectPrivacy = document.getElementById('btnRejectPrivacy');
     
+    const publicNav = document.getElementById('public-nav');
+    const publicTabBtns = document.querySelectorAll('.public-tab-btn');
+    const publicMenuView = document.getElementById('public-menu-view');
+    const btnMenuToRegister = document.getElementById('btnMenuToRegister');
+
     const showLogin = document.getElementById('showLogin');
     const showRegister = document.getElementById('showRegister');
     const registrationForm = document.getElementById('registration-form');
@@ -41,6 +62,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const ticketsList = document.getElementById('ticketsList');
     const btnSendEmailPDF = document.getElementById('btnSendEmailPDF');
 
+    // Inicializar galerías del menú (pública y dashboard) + Lightbox
+    renderizarGaleriaMenu('publicMenuGallery', 'all');
+    renderizarGaleriaMenu('dashboardMenuGallery', 'all');
+    inicializarFiltrosMenu();
+    inicializarLightbox();
+
     // Aplicar estado del interruptor de preferencias al iniciar
     if (grupoPreferenciasRegistro) {
         grupoPreferenciasRegistro.style.display = HABILITAR_PREFERENCIAS_CONSUMO ? 'block' : 'none';
@@ -55,26 +82,66 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Control de navegación pública (Club de Socios vs Menú)
+    publicTabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.getAttribute('data-public-target');
+            if (target === 'menu') {
+                mostrarVistaPublica('menu');
+            } else {
+                mostrarVistaPublica(vistaClubPublica);
+            }
+        });
+    });
+
+    if (btnMenuToRegister) {
+        btnMenuToRegister.addEventListener('click', () => {
+            vistaClubPublica = 'register';
+            mostrarVistaPublica('register');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
     // Verificar sesión activa previa y sincronizar con Google Sheets
     const savedUser = localStorage.getItem('ocaso_user');
+    const abrirMenuDirecto = window.location.hash.toLowerCase() === '#menu';
+
     if (savedUser) {
         const parsedUser = JSON.parse(savedUser);
         mostrarDashboard(parsedUser);
+        if (abrirMenuDirecto) {
+            activarPestanaDashboard('tab-menu');
+        }
         if (parsedUser.email) {
             sincronizarDatosCliente(parsedUser.email);
         }
+    } else if (abrirMenuDirecto) {
+        mostrarVistaPublica('menu');
+    } else {
+        mostrarVistaPublica('register');
     }
+
+    // Permitir abrir #menu en caliente si cambia el hash
+    window.addEventListener('hashchange', () => {
+        if (window.location.hash.toLowerCase() === '#menu') {
+            if (localStorage.getItem('ocaso_user')) {
+                activarPestanaDashboard('tab-menu');
+            } else {
+                mostrarVistaPublica('menu');
+            }
+        }
+    });
 
     showLogin.addEventListener('click', (e) => {
         e.preventDefault();
-        registrationForm.style.display = 'none';
-        loginView.style.display = 'block';
+        vistaClubPublica = 'login';
+        mostrarVistaPublica('login');
     });
 
     showRegister.addEventListener('click', (e) => {
         e.preventDefault();
-        loginView.style.display = 'none';
-        registrationForm.style.display = 'block';
+        vistaClubPublica = 'register';
+        mostrarVistaPublica('register');
     });
 
     btnOpenModal.addEventListener('click', () => {
@@ -271,6 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     tickets: result.tickets || []
                 };
                 localStorage.setItem('ocaso_user', JSON.stringify(clienteData));
+                activarPestanaDashboard('tab-qr');
                 mostrarDashboard(clienteData);
             } else {
                 alert(result.message || 'Cuenta no encontrada.');
@@ -338,32 +406,197 @@ document.addEventListener('DOMContentLoaded', () => {
         ultimoFiltroKey = "";
         ticketsSeleccionados.clear();
         dashboardView.style.display = 'none';
-        registrationForm.style.display = 'block';
+        activarPestanaDashboard('tab-qr');
+        vistaClubPublica = 'register';
+        mostrarVistaPublica('register');
         document.getElementById('clientForm').reset();
         if (selectPreferenciasRegistro && !HABILITAR_PREFERENCIAS_CONSUMO) {
             selectPreferenciasRegistro.value = 'Ninguna';
         }
     });
 
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    tabBtns.forEach(btn => {
+    // PESTAÑAS DEL DASHBOARD: Mi QR | Menú | Tickets
+    const dashboardTabBtns = document.querySelectorAll('.dashboard-tab-btn');
+    dashboardTabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            tabBtns.forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
-            btn.classList.add('active');
-            const target = document.getElementById(btn.getAttribute('data-target'));
-            if (target) target.classList.add('active');
+            const targetId = btn.getAttribute('data-target');
+            activarPestanaDashboard(targetId);
 
-            const currentUser = JSON.parse(localStorage.getItem('ocaso_user') || '{}');
-            if (currentUser.email) {
-                sincronizarDatosCliente(currentUser.email);
+            // Solo sincroniza con Google Sheets en QR y Tickets (no hace falta al abrir el Menú)
+            if (targetId !== 'tab-menu') {
+                const currentUser = JSON.parse(localStorage.getItem('ocaso_user') || '{}');
+                if (currentUser.email) {
+                    sincronizarDatosCliente(currentUser.email);
+                }
             }
         });
     });
 });
 
+// ==========================================
+// NAVEGACIÓN PÚBLICA Y PESTAÑAS
+// ==========================================
+function mostrarVistaPublica(vista) {
+    const publicNav = document.getElementById('public-nav');
+    const registrationForm = document.getElementById('registration-form');
+    const loginView = document.getElementById('login-view');
+    const publicMenuView = document.getElementById('public-menu-view');
+    const dashboardView = document.getElementById('dashboard-view');
+
+    dashboardView.style.display = 'none';
+    if (publicNav) publicNav.style.display = 'flex';
+
+    registrationForm.style.display = vista === 'register' ? 'block' : 'none';
+    loginView.style.display = vista === 'login' ? 'block' : 'none';
+    publicMenuView.style.display = vista === 'menu' ? 'block' : 'none';
+
+    document.querySelectorAll('.public-tab-btn').forEach(btn => {
+        const target = btn.getAttribute('data-public-target');
+        const esActivo = (vista === 'menu' && target === 'menu') || (vista !== 'menu' && target === 'club');
+        btn.classList.toggle('active', esActivo);
+    });
+}
+
+function activarPestanaDashboard(targetId) {
+    document.querySelectorAll('.dashboard-tab-btn').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('data-target') === targetId);
+    });
+    document.querySelectorAll('.tab-content').forEach(c => {
+        c.classList.toggle('active', c.id === targetId);
+    });
+}
+
+// ==========================================
+// MENÚ DIGITAL Y LIGHTBOX
+// ==========================================
+function obtenerItemsMenuFiltrados(filtro) {
+    if (!filtro || filtro === 'all') return MENU_ITEMS;
+    return MENU_ITEMS.filter(item => item.categoria === filtro);
+}
+
+function renderizarGaleriaMenu(containerId, filtro) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const items = obtenerItemsMenuFiltrados(filtro);
+    container.innerHTML = items.map((item, idx) => `
+        <div class="menu-card" data-menu-idx="${idx}" data-menu-filter="${filtro}">
+            <div class="menu-card-header">
+                <span class="menu-card-title">${item.titulo}</span>
+                <span class="menu-card-badge">${item.etiqueta}</span>
+            </div>
+            <img class="menu-card-img" src="${item.src}" alt="${item.titulo} - OCASO Coffee Club" loading="lazy">
+        </div>
+    `).join('');
+
+    container.querySelectorAll('.menu-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const idx = Number(card.getAttribute('data-menu-idx')) || 0;
+            const currentFilter = card.getAttribute('data-menu-filter') || 'all';
+            abrirLightbox(obtenerItemsMenuFiltrados(currentFilter), idx);
+        });
+    });
+}
+
+function inicializarFiltrosMenu() {
+    document.querySelectorAll('.menu-filter-pills').forEach(group => {
+        const scope = group.getAttribute('data-menu-scope');
+        const galleryId = scope === 'public' ? 'publicMenuGallery' : 'dashboardMenuGallery';
+
+        group.querySelectorAll('.menu-pill').forEach(pill => {
+            pill.addEventListener('click', () => {
+                group.querySelectorAll('.menu-pill').forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+                renderizarGaleriaMenu(galleryId, pill.getAttribute('data-filter'));
+            });
+        });
+    });
+}
+
+function inicializarLightbox() {
+    const lightbox = document.getElementById('menuLightbox');
+    const stage = document.getElementById('lightboxStage');
+    const btnClose = document.getElementById('btnCloseLightbox');
+    const btnPrev = document.getElementById('btnLightboxPrev');
+    const btnNext = document.getElementById('btnLightboxNext');
+    const btnZoom = document.getElementById('btnLightboxZoom');
+
+    if (!lightbox) return;
+
+    btnClose.addEventListener('click', cerrarLightbox);
+
+    btnPrev.addEventListener('click', () => {
+        lightboxIndiceActual = (lightboxIndiceActual - 1 + lightboxListaActual.length) % lightboxListaActual.length;
+        actualizarLightbox();
+    });
+
+    btnNext.addEventListener('click', () => {
+        lightboxIndiceActual = (lightboxIndiceActual + 1) % lightboxListaActual.length;
+        actualizarLightbox();
+    });
+
+    btnZoom.addEventListener('click', () => {
+        const zoomed = stage.classList.toggle('is-zoomed');
+        btnZoom.textContent = zoomed ? 'Ajustar' : 'Ampliar';
+        if (zoomed) {
+            stage.scrollTop = 0;
+            stage.scrollLeft = 0;
+        }
+    });
+
+    stage.addEventListener('click', (e) => {
+        if (e.target === stage) cerrarLightbox();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (lightbox.style.display === 'none') return;
+        if (e.key === 'Escape') cerrarLightbox();
+        if (e.key === 'ArrowLeft') btnPrev.click();
+        if (e.key === 'ArrowRight') btnNext.click();
+    });
+}
+
+function abrirLightbox(lista, indice) {
+    const lightbox = document.getElementById('menuLightbox');
+    lightboxListaActual = lista && lista.length ? lista : MENU_ITEMS;
+    lightboxIndiceActual = Math.max(0, Math.min(indice, lightboxListaActual.length - 1));
+
+    actualizarLightbox();
+    lightbox.style.display = 'flex';
+    lightbox.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('no-scroll');
+}
+
+function actualizarLightbox() {
+    const item = lightboxListaActual[lightboxIndiceActual];
+    const img = document.getElementById('lightboxImg');
+    const title = document.getElementById('lightboxTitle');
+    const counter = document.getElementById('lightboxCounter');
+    const stage = document.getElementById('lightboxStage');
+    const btnZoom = document.getElementById('btnLightboxZoom');
+
+    if (!item) return;
+
+    stage.classList.remove('is-zoomed');
+    btnZoom.textContent = 'Ampliar';
+    img.src = item.src;
+    img.alt = `${item.titulo} - OCASO Coffee Club`;
+    title.textContent = item.titulo;
+    counter.textContent = `${lightboxIndiceActual + 1} / ${lightboxListaActual.length}`;
+}
+
+function cerrarLightbox() {
+    const lightbox = document.getElementById('menuLightbox');
+    const stage = document.getElementById('lightboxStage');
+    lightbox.style.display = 'none';
+    lightbox.setAttribute('aria-hidden', 'true');
+    stage.classList.remove('is-zoomed');
+    document.body.classList.remove('no-scroll');
+}
+
+// ==========================================
 // SINCRONIZACIÓN AUTOMÁTICA EN SEGUNDO PLANO CON GOOGLE SHEETS
+// ==========================================
 async function sincronizarDatosCliente(email) {
     try {
         const response = await fetch(APPS_SCRIPT_URL, {
@@ -443,6 +676,7 @@ async function ejecutarRegistroCliente() {
                 tickets: []
             };
             localStorage.setItem('ocaso_user', JSON.stringify(clienteCreado));
+            activarPestanaDashboard('tab-qr');
             mostrarDashboard(clienteCreado);
         } else {
             alert(result.message || 'Error al registrar en Google Sheets.');
@@ -468,6 +702,11 @@ function obtenerTicketsFiltrados(tickets) {
 }
 
 function mostrarDashboard(user) {
+    const publicNav = document.getElementById('public-nav');
+    const publicMenuView = document.getElementById('public-menu-view');
+    if (publicNav) publicNav.style.display = 'none';
+    if (publicMenuView) publicMenuView.style.display = 'none';
+
     document.getElementById('registration-form').style.display = 'none';
     document.getElementById('login-view').style.display = 'none';
     document.getElementById('dashboard-view').style.display = 'block';

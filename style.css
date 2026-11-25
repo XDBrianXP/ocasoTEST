@@ -28,6 +28,10 @@ body {
     padding: 20px 12px;
 }
 
+body.no-scroll {
+    overflow: hidden;
+}
+
 .main-wrapper {
     width: 100%;
     max-width: 420px;
@@ -78,10 +82,14 @@ body {
 .card {
     background-color: #ffffff;
     width: 92%;
-    padding: 26px 22px;
+    padding: 22px 22px 26px 22px;
     border-radius: 0 0 20px 20px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     z-index: 1;
+}
+
+.public-nav-tabs {
+    margin-bottom: 18px;
 }
 
 .form-group {
@@ -192,7 +200,7 @@ body {
 
 .nav-tabs {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     margin-bottom: 18px;
     border-bottom: 1.5px solid #eee;
 }
@@ -201,12 +209,13 @@ body {
     flex: 1;
     background: none;
     border: none;
-    padding: 10px 6px;
+    padding: 10px 4px;
     font-weight: bold;
     color: #777;
     cursor: pointer;
     font-size: 13.5px;
     transition: 0.2s;
+    white-space: nowrap;
 }
 
 .tab-btn.active {
@@ -333,6 +342,235 @@ body {
     font-size: 13px;
     font-weight: bold;
     cursor: pointer;
+}
+
+/* ==========================================
+   MENÚ DIGITAL (PÚBLICO Y DASHBOARD)
+   ========================================== */
+.menu-intro {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.menu-hint {
+    font-size: 12.5px;
+    color: #6c6860;
+}
+
+.menu-filter-pills {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.menu-pill {
+    flex: 1;
+    background-color: var(--crema-ritual);
+    border: 1px solid var(--borde-ritual);
+    color: var(--nogal-tostado);
+    padding: 8px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.menu-pill.active {
+    background-color: var(--carbon-profundo);
+    border-color: var(--carbon-profundo);
+    color: var(--ambar-ocaso);
+}
+
+.menu-gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.menu-card {
+    background-color: var(--crema-ritual);
+    border: 1px solid var(--borde-ritual);
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.menu-card:active {
+    transform: scale(0.99);
+}
+
+.menu-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 12px;
+    background-color: var(--crema-ritual);
+    border-bottom: 1px solid var(--borde-ritual);
+}
+
+.menu-card-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--carbon-profundo);
+}
+
+.menu-card-badge {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--nogal-tostado);
+    background-color: var(--marfil-digital);
+    border: 1px solid var(--borde-ritual);
+    padding: 3px 8px;
+    border-radius: 999px;
+}
+
+.menu-card-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    background-color: #2b2119;
+}
+
+.menu-cta-box {
+    margin-top: 18px;
+    background-color: var(--crema-ritual);
+    border: 1px solid var(--borde-ritual);
+    border-radius: 14px;
+    padding: 14px;
+    text-align: center;
+}
+
+.menu-cta-box p {
+    font-size: 13px;
+    color: var(--carbon-profundo);
+    margin-bottom: 10px;
+}
+
+.btn-menu-cta {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--carbon-profundo);
+    color: var(--ambar-ocaso);
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.btn-menu-cta:hover {
+    opacity: 0.92;
+}
+
+/* ==========================================
+   LIGHTBOX PANTALLA COMPLETA (MENÚ)
+   ========================================== */
+.lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 19, 17, 0.95);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.lightbox-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    color: #ffffff;
+    background: rgba(27, 27, 25, 0.9);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lightbox-title-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.lightbox-title {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.lightbox-counter {
+    font-size: 12px;
+    color: var(--ambar-ocaso);
+}
+
+.lightbox-close-btn {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.lightbox-stage {
+    flex: 1;
+    overflow: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 12px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.lightbox-stage.is-zoomed {
+    display: block;
+}
+
+.lightbox-stage img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 10px;
+    transition: width 0.2s ease;
+}
+
+.lightbox-stage.is-zoomed img {
+    max-width: none;
+    max-height: none;
+    width: 175%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+.lightbox-controls {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px 18px 16px;
+    background: rgba(27, 27, 25, 0.9);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lightbox-ctrl-btn {
+    flex: 1;
+    padding: 11px 8px;
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.lightbox-zoom-btn {
+    background: var(--ambar-interfaz);
+    color: var(--carbon-profundo);
 }
 
 /* ==========================================
