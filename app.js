@@ -8,13 +8,13 @@ const HABILITAR_PREFERENCIAS_CONSUMO = false;
 
 // CATÁLOGO VISUAL DEL MENÚ (carpeta /menu)
 const MENU_ITEMS = [
-    { src: "menu/01-bebidas-precios.jpeg", titulo: "Menú de Bebidas", etiqueta: "Precios", categoria: "precios" },
-    { src: "menu/02-alimentos-precios.jpeg", titulo: "Menú de Alimentos", etiqueta: "Precios", categoria: "precios" },
-    { src: "menu/03-coffee-classics.jpeg", titulo: "Coffee Classics", etiqueta: "Fotos", categoria: "fotos" },
-    { src: "menu/04-coffee-creations.jpeg", titulo: "Coffee Creations", etiqueta: "Fotos", categoria: "fotos" },
-    { src: "menu/05-beyond-coffee.jpeg", titulo: "Beyond Coffee", etiqueta: "Fotos", categoria: "fotos" },
-    { src: "menu/06-dirty-functional.jpeg", titulo: "Dirty & Functional", etiqueta: "Fotos", categoria: "fotos" },
-    { src: "menu/07-alimentos-fotos.jpeg", titulo: "Alimentos", etiqueta: "Fotos", categoria: "fotos" }
+    { src: "menu/01-bebidas-precios.jpeg", titulo: "Menú de Bebidas", etiqueta: "Precios" },
+    { src: "menu/02-alimentos-precios.jpeg", titulo: "Menú de Alimentos", etiqueta: "Precios" },
+    { src: "menu/03-coffee-classics.jpeg", titulo: "Coffee Classics", etiqueta: "Fotos" },
+    { src: "menu/04-coffee-creations.jpeg", titulo: "Coffee Creations", etiqueta: "Fotos" },
+    { src: "menu/05-beyond-coffee.jpeg", titulo: "Beyond Coffee", etiqueta: "Fotos" },
+    { src: "menu/06-dirty-functional.jpeg", titulo: "Dirty & Functional", etiqueta: "Fotos" },
+    { src: "menu/07-alimentos-fotos.jpeg", titulo: "Alimentos", etiqueta: "Fotos" }
 ];
 
 let filtroFechaInicializado = false;
@@ -33,15 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnAcceptPrivacy = document.getElementById('btnAcceptPrivacy');
     const btnRejectPrivacy = document.getElementById('btnRejectPrivacy');
     
-    const publicNav = document.getElementById('public-nav');
     const publicTabBtns = document.querySelectorAll('.public-tab-btn');
-    const publicMenuView = document.getElementById('public-menu-view');
     const btnMenuToRegister = document.getElementById('btnMenuToRegister');
 
     const showLogin = document.getElementById('showLogin');
     const showRegister = document.getElementById('showRegister');
-    const registrationForm = document.getElementById('registration-form');
-    const loginView = document.getElementById('login-view');
     const dashboardView = document.getElementById('dashboard-view');
     const btnLoginSubmit = document.getElementById('btnLoginSubmit');
     const btnLogout = document.getElementById('btnLogout');
@@ -63,9 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnSendEmailPDF = document.getElementById('btnSendEmailPDF');
 
     // Inicializar galerías del menú (pública y dashboard) + Lightbox
-    renderizarGaleriaMenu('publicMenuGallery', 'all');
-    renderizarGaleriaMenu('dashboardMenuGallery', 'all');
-    inicializarFiltrosMenu();
+    renderizarGaleriaMenu('publicMenuGallery');
+    renderizarGaleriaMenu('dashboardMenuGallery');
     inicializarLightbox();
 
     // Aplicar estado del interruptor de preferencias al iniciar
@@ -469,18 +464,12 @@ function activarPestanaDashboard(targetId) {
 // ==========================================
 // MENÚ DIGITAL Y LIGHTBOX
 // ==========================================
-function obtenerItemsMenuFiltrados(filtro) {
-    if (!filtro || filtro === 'all') return MENU_ITEMS;
-    return MENU_ITEMS.filter(item => item.categoria === filtro);
-}
-
-function renderizarGaleriaMenu(containerId, filtro) {
+function renderizarGaleriaMenu(containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    const items = obtenerItemsMenuFiltrados(filtro);
-    container.innerHTML = items.map((item, idx) => `
-        <div class="menu-card" data-menu-idx="${idx}" data-menu-filter="${filtro}">
+    container.innerHTML = MENU_ITEMS.map((item, idx) => `
+        <div class="menu-card" data-menu-idx="${idx}">
             <div class="menu-card-header">
                 <span class="menu-card-title">${item.titulo}</span>
                 <span class="menu-card-badge">${item.etiqueta}</span>
@@ -492,23 +481,7 @@ function renderizarGaleriaMenu(containerId, filtro) {
     container.querySelectorAll('.menu-card').forEach(card => {
         card.addEventListener('click', () => {
             const idx = Number(card.getAttribute('data-menu-idx')) || 0;
-            const currentFilter = card.getAttribute('data-menu-filter') || 'all';
-            abrirLightbox(obtenerItemsMenuFiltrados(currentFilter), idx);
-        });
-    });
-}
-
-function inicializarFiltrosMenu() {
-    document.querySelectorAll('.menu-filter-pills').forEach(group => {
-        const scope = group.getAttribute('data-menu-scope');
-        const galleryId = scope === 'public' ? 'publicMenuGallery' : 'dashboardMenuGallery';
-
-        group.querySelectorAll('.menu-pill').forEach(pill => {
-            pill.addEventListener('click', () => {
-                group.querySelectorAll('.menu-pill').forEach(p => p.classList.remove('active'));
-                pill.classList.add('active');
-                renderizarGaleriaMenu(galleryId, pill.getAttribute('data-filter'));
-            });
+            abrirLightbox(MENU_ITEMS, idx);
         });
     });
 }

@@ -349,37 +349,12 @@ body.no-scroll {
    ========================================== */
 .menu-intro {
     text-align: center;
-    margin-bottom: 10px;
+    margin-bottom: 14px;
 }
 
 .menu-hint {
     font-size: 12.5px;
     color: #6c6860;
-}
-
-.menu-filter-pills {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 14px;
-}
-
-.menu-pill {
-    flex: 1;
-    background-color: var(--crema-ritual);
-    border: 1px solid var(--borde-ritual);
-    color: var(--nogal-tostado);
-    padding: 8px 10px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.menu-pill.active {
-    background-color: var(--carbon-profundo);
-    border-color: var(--carbon-profundo);
-    color: var(--ambar-ocaso);
 }
 
 .menu-gallery {
