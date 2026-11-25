@@ -10,11 +10,11 @@ const HABILITAR_PREFERENCIAS_CONSUMO = false;
 const MENU_ITEMS = [
     { src: "menu/01-bebidas-precios.jpeg", titulo: "Menú de Bebidas", etiqueta: "Precios" },
     { src: "menu/02-alimentos-precios.jpeg", titulo: "Menú de Alimentos", etiqueta: "Precios" },
-    { src: "menu/03-coffee-classics.jpeg", titulo: "Coffee Classics", etiqueta: "Fotos" },
-    { src: "menu/04-coffee-creations.jpeg", titulo: "Coffee Creations", etiqueta: "Fotos" },
-    { src: "menu/05-beyond-coffee.jpeg", titulo: "Beyond Coffee", etiqueta: "Fotos" },
-    { src: "menu/06-dirty-functional.jpeg", titulo: "Dirty & Functional", etiqueta: "Fotos" },
-    { src: "menu/07-alimentos-fotos.jpeg", titulo: "Alimentos", etiqueta: "Fotos" }
+    { src: "menu/03-coffee-classics.jpeg", titulo: "Coffee Classics", etiqueta: "Productos" },
+    { src: "menu/04-coffee-creations.jpeg", titulo: "Coffee Creations", etiqueta: "Productos" },
+    { src: "menu/05-beyond-coffee.jpeg", titulo: "Beyond Coffee", etiqueta: "Productos" },
+    { src: "menu/06-dirty-functional.jpeg", titulo: "Dirty & Functional", etiqueta: "Productos" },
+    { src: "menu/07-alimentos-fotos.jpeg", titulo: "Alimentos", etiqueta: "Productos" }
 ];
 
 let filtroFechaInicializado = false;
